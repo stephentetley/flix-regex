@@ -109,8 +109,8 @@ namespace Text/Regex/MatchEvaluator {
         )
 
 
-    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): MatchEvaluator[a] & Impure=
-        MatchEvaluator(r -> fn(r) as & Pure) as & Impure
+    def liftPrimResult(fn: ##java.util.regex.Matcher -> Result[a, String] & ef): MatchEvaluator[a] & ef =
+        MatchEvaluator(r -> fn(r) as & Pure) as & ef
 
     pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
         case Some(x1) => point(x1)
@@ -121,8 +121,8 @@ namespace Text/Regex/MatchEvaluator {
     pub def liftResult(x: Result[a, String]): MatchEvaluator[a] =
         MatchEvaluator(_ -> x)
 
-    pub def liftOperation(fn: Unit ~> Result[a, String]): MatchEvaluator[a] & Impure =
-        MatchEvaluator(_ -> fn() as & Pure) as & Impure
+    pub def liftOperation(fn: Unit -> Result[a, String] & ef): MatchEvaluator[a] & ef =
+        MatchEvaluator(_ -> fn() as & Pure) as & ef
 
 
     pub def optional(mx: MatchEvaluator[a]): MatchEvaluator[Option[a]] =

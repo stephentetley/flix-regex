@@ -131,11 +131,11 @@ namespace Text/Regex/Matcher {
             }
         )
 
-    def liftPrim(fn : ##java.util.regex.Matcher ~> a): Matcher[a] & Impure =
-        Matcher(r -> Ok(fn(r) as & Pure)) as & Impure
+    def liftPrim(fn : ##java.util.regex.Matcher -> a & ef): Matcher[a] & ef =
+        Matcher(r -> Ok(fn(r) as & Pure)) as & ef
 
-    def liftPrimResult(fn : ##java.util.regex.Matcher ~> Result[a, String]): Matcher[a] & Impure =
-        Matcher(r -> fn(r) as & Pure) as & Impure
+    def liftPrimResult(fn : ##java.util.regex.Matcher -> Result[a, String] & ef): Matcher[a] & ef =
+        Matcher(r -> fn(r) as & Pure) as & ef
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 

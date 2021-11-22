@@ -124,17 +124,17 @@ namespace Text/Regex/Replacer {
     pub def ignore(x: Replacer[a]): Replacer[Unit] = map(_ -> (), x)
 
 
-    def liftPrim(fn: ##java.util.regex.Matcher ~> a): Replacer[a] & Impure =
-        Replacer((_, m, n) -> Ok((fn(m) as & Pure, n))) as & Impure
+    def liftPrim(fn: ##java.util.regex.Matcher -> a & ef): Replacer[a] & ef =
+        Replacer((_, m, n) -> Ok((fn(m) as & Pure, n))) as & ef
 
-    def liftPrimResult(fn: ##java.util.regex.Matcher ~> Result[a, String]): Replacer[a] & Impure =
-        Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m) as & Pure)) as & Impure
+    def liftPrimResult(fn: ##java.util.regex.Matcher -> Result[a, String] & ef): Replacer[a] & ef =
+        Replacer((_, m, n) -> Result.map(x -> (x, n), fn(m) as & Pure)) as & ef
 
-    def liftWriterPrim(fn : (##java.util.regex.Matcher, StringBuilder) ~> a): Replacer[a] & Impure =
-        Replacer((sb, m, n) -> Ok((fn(m, sb) as & Pure, n))) as & Impure
+    def liftWriterPrim(fn : (##java.util.regex.Matcher, StringBuilder) -> a & ef): Replacer[a] & ef =
+        Replacer((sb, m, n) -> Ok((fn(m, sb) as & Pure, n))) as & ef
 
-    def liftWriterPrimResult(fn : (##java.util.regex.Matcher, StringBuilder) ~> Result[a, String]): Replacer[a] & Impure =
-        Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb) as & Pure)) as & Impure
+    def liftWriterPrimResult(fn : (##java.util.regex.Matcher, StringBuilder) -> Result[a, String] & ef): Replacer[a] & ef =
+        Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb) as & Pure)) as & ef
 
     pub def appendTail!(): Replacer[Unit] & Impure =
         use Text/Regex/Internal/Matcher.{appendTail};
