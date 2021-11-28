@@ -16,10 +16,11 @@
 
 
 /// This is a "steppable" matcher like .Net `Regex.Match` but wrapped as a monad.
+/// It does not support backtracking so cannot be made an instance of `Alternative`.
 
 namespace Text/Regex {
 
-    pub opaque type Matcher[a] = ##java.util.regex.Matcher -> Result[a, String]
+    pub opaque type Matcher[a] = ##java.util.regex.Matcher -> Result[a, String] & Impure
 
     instance Functor[Matcher] {
         pub def map(f: a -> b & ef, o: Matcher[a]): Matcher[b] & ef = Text/Regex/Matcher.map(f, o)
@@ -70,13 +71,13 @@ namespace Text/Regex/Matcher {
     /// Returns `x` wrapped as a Matcher.
     ///
     pub def point(x: a): Matcher[a] =
-        Matcher(_ -> Ok(x))
+        Matcher(_ -> Ok(x) as & Impure)
 
     pub def throwError(msg: String): Matcher[a] =
-        Matcher(_ -> Err(msg))
+        Matcher(_ -> Err(msg) as & Impure)
 
 
-    def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] =
+    def apply1(x: Matcher[a], r: ##java.util.regex.Matcher): Result[a, String] & Impure =
         let Matcher(f) = x;
         f(r)
 
@@ -84,7 +85,7 @@ namespace Text/Regex/Matcher {
         Matcher(r ->
             match apply1(x, r) {
                 case Ok(a) => {
-                    let ans = f(a) as & Pure;
+                    let ans = f(a) as & Impure;
                     Ok(ans)
                 }
                 case Err(e) => Err(e)
@@ -95,7 +96,7 @@ namespace Text/Regex/Matcher {
         Matcher(r ->
             match apply1(mf, r) {
                 case Ok(f) => match apply1(ma, r) {
-                    case Ok(a) => Ok(f(a) as & Pure)
+                    case Ok(a) => Ok(f(a) as & Impure)
                     case Err(e2) => Err(e2)
                 }
                 case Err(e1) => Err(e1)
@@ -105,7 +106,7 @@ namespace Text/Regex/Matcher {
     pub def bind(x: Matcher[a], k: a -> Matcher[b] & ef): Matcher[b] & ef =
         Matcher(r ->
             match apply1(x, r) {
-                case Ok(a) => apply1(k(a) as & Pure, r)
+                case Ok(a) => apply1(k(a) as & Impure, r)
                 case Err(e) => Err(e)
             }
         ) as & ef
@@ -131,25 +132,25 @@ namespace Text/Regex/Matcher {
             }
         )
 
-    def liftPrim(fn : ##java.util.regex.Matcher -> a & ef): Matcher[a] & ef =
-        Matcher(r -> Ok(fn(r) as & Pure)) as & ef
+    def liftPrim(fn : ##java.util.regex.Matcher -> a & Impure): Matcher[a] =
+        Matcher(r -> Ok(fn(r)))
 
-    def liftPrimResult(fn : ##java.util.regex.Matcher -> Result[a, String] & ef): Matcher[a] & ef =
-        Matcher(r -> fn(r) as & Pure) as & ef
+    def liftPrimResult(fn : ##java.util.regex.Matcher -> Result[a, String] & Impure): Matcher[a] =
+        Matcher(r -> fn(r))
 
     pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
-    pub def matches(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.matches)
+    pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
 
-    pub def lookingAt(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
+    pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
 
-    pub def find(): Matcher[Bool] & Impure = liftPrim(Text/Regex/Internal/Matcher.find)
+    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.find)
 
-    pub def start(): Matcher[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.start)
+    pub def start(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
 
-    pub def end(): Matcher[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.end)
+    pub def end(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.end)
 
-    pub def findLast(): Matcher[Bool] & Impure =
+    pub def findLast(): Matcher[Bool] =
         let* first = find();
         if (first) {
             let* pos = start();
@@ -157,7 +158,7 @@ namespace Text/Regex/Matcher {
             findFrom(endpos - 1)
         } else point(false)
 
-    def findLastHelper(lastPos: Int32): Matcher[Int32] & Impure =
+    def findLastHelper(lastPos: Int32): Matcher[Int32] =
         let* more = find();
         if (more) {
             let* pos = start();
@@ -165,11 +166,11 @@ namespace Text/Regex/Matcher {
         } else point(lastPos)
 
 
-    pub def findFrom(b: Int32): Matcher[Bool] & Impure =
+    pub def findFrom(b: Int32): Matcher[Bool] =
         liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
 
 
-    pub def findLastFrom(b: Int32): Matcher[Bool] & Impure =
+    pub def findLastFrom(b: Int32): Matcher[Bool] =
         let* first = findFrom(b);
         if (first) {
             let* pos = start();
@@ -177,13 +178,13 @@ namespace Text/Regex/Matcher {
             findFrom(endpos - 1)
         } else point(false)
 
-    pub def content(): Matcher[String] & Impure =
+    pub def content(): Matcher[String] =
         liftPrimResult(Text/Regex/Internal/Matcher.group)
 
-    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] & Impure =
-        Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r) as & Pure) as & Impure
+    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
+        Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r))
 
-    pub def getMatch(): Matcher[String] & Impure =
+    pub def getMatch(): Matcher[String] =
         let* ans = find();
         if (ans)
             content()
@@ -198,17 +199,17 @@ namespace Text/Regex/Matcher {
             }
         )
 
-    pub def done(): Matcher[Bool] & Impure = ifThenElse(content(), _ -> point(false), point(true))
+    pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    pub def reset!(): Matcher[Unit] & Impure = liftPrim(Text/Regex/Internal/Matcher.reset)
+    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Matcher.reset)
 
-    pub def resetInput!(input: String): Matcher[Unit] & Impure =
+    pub def resetInput!(input: String): Matcher[Unit] =
         liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
-    pub def setRegion!(b: Int32, e: Int32): Matcher[Unit] & Impure =
+    pub def setRegion!(b: Int32, e: Int32): Matcher[Unit] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, b, e))
 
-    pub def setPattern!(patt: Pattern): Matcher[Unit] & Impure =
+    pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;
         liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
 

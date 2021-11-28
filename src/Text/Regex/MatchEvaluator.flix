@@ -19,9 +19,9 @@
 namespace Text/Regex {
 
     ///
-    /// Matcher is a monad (reader, error).
+    /// Matcher is a monad (handle, error).
     ///
-    pub opaque type MatchEvaluator[a] = ##java.util.regex.Matcher -> Result[a, String]
+    pub opaque type MatchEvaluator[a] = ##java.util.regex.Matcher -> Result[a, String] & Impure
 
     instance Functor[MatchEvaluator] {
         pub def map(f: a -> b & ef, o: MatchEvaluator[a]): MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.map(f, o)
@@ -44,20 +44,19 @@ namespace Text/Regex/MatchEvaluator {
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 
-    pub def point(x: a): MatchEvaluator[a] = MatchEvaluator(_ -> Ok(x))
+    pub def point(x: a): MatchEvaluator[a] = MatchEvaluator(_ -> Ok(x) as & Impure)
 
 
-    def apply1(x: MatchEvaluator[a], m: ##java.util.regex.Matcher): Result[a, String] =
+    def apply1(x: MatchEvaluator[a], m: ##java.util.regex.Matcher): Result[a, String] & Impure =
         let MatchEvaluator(f) = x;
         f(m)
 
     pub def runMatchEvaluator(x: MatchEvaluator[a], m: ##java.util.regex.Matcher): Result[a, String] & Impure =
-        let MatchEvaluator(f) = x;
-        f(m) as & Impure
+        apply1(x, m)
 
 
     pub def throwError(msg: String): MatchEvaluator[b] = 
-        MatchEvaluator(_ -> Err(msg))
+        MatchEvaluator(_ -> Err(msg) as & Impure)
 
     pub def swapError(mx: MatchEvaluator[a], msg: String): MatchEvaluator[a] =
         MatchEvaluator(r -> match apply1(mx, r) {
@@ -69,7 +68,7 @@ namespace Text/Regex/MatchEvaluator {
         MatchEvaluator(r -> 
             match apply1(x, r) {
                 case Ok(a) => {
-                    let ans = f(a) as & Pure;
+                    let ans = f(a) as & Impure;
                     Ok(ans)
                 }
                 case Err(e) => Err(e)
@@ -80,7 +79,7 @@ namespace Text/Regex/MatchEvaluator {
         MatchEvaluator(r -> 
             match apply1(mf, r) {
                 case Ok(f) => match apply1(ma, r) {
-                    case Ok(a) => Ok(f(a) as & Pure)
+                    case Ok(a) => Ok(f(a) as & Impure)
                     case Err(e2) => Err(e2)
                 }
                 case Err(e1) => Err(e1)
@@ -90,15 +89,17 @@ namespace Text/Regex/MatchEvaluator {
     pub def bind(x: MatchEvaluator[a], k: a -> MatchEvaluator[b] & ef): MatchEvaluator[b] & ef =
         MatchEvaluator(r -> 
             match apply1(x, r) {
-                case Ok(a) => apply1(k(a) as & Pure, r)
+                case Ok(a) => apply1(k(a) as & Impure, r)
                 case Err(e) => Err(e)
             }
         ) as & ef
 
     pub def flatMap(k: a -> MatchEvaluator[b] & ef, x: MatchEvaluator[a]): MatchEvaluator[b] & ef = bind(x, k)
 
+    // MatchEvaluator can be alternative because it does not "step".
+    // It is only run on the current match.
 
-    pub def mzero(): MatchEvaluator[a] = MatchEvaluator(_ -> Err("MatchEvaluator.mzero"))
+    pub def mzero(): MatchEvaluator[a] = throwError("MatchEvaluator.mzero")
 
     pub def alt(ma: MatchEvaluator[a], mb: MatchEvaluator[a]): MatchEvaluator[a] =
         MatchEvaluator(r ->
@@ -109,8 +110,8 @@ namespace Text/Regex/MatchEvaluator {
         )
 
 
-    def liftPrimResult(fn: ##java.util.regex.Matcher -> Result[a, String] & ef): MatchEvaluator[a] & ef =
-        MatchEvaluator(r -> fn(r) as & Pure) as & ef
+    def liftPrimResult(fn: ##java.util.regex.Matcher -> Result[a, String] & Impure): MatchEvaluator[a] =
+        MatchEvaluator(r -> fn(r) as & Impure)
 
     pub def liftOption(x: Option[a], errMsg: String): MatchEvaluator[a] = match x { 
         case Some(x1) => point(x1)
@@ -119,10 +120,10 @@ namespace Text/Regex/MatchEvaluator {
         
 
     pub def liftResult(x: Result[a, String]): MatchEvaluator[a] =
-        MatchEvaluator(_ -> x)
+        MatchEvaluator(_ -> x as & Impure)
 
-    pub def liftOperation(fn: Unit -> Result[a, String] & ef): MatchEvaluator[a] & ef =
-        MatchEvaluator(_ -> fn() as & Pure) as & ef
+    pub def liftOperation(fn: Unit -> Result[a, String] & ef): MatchEvaluator[a] =
+        MatchEvaluator(_ -> fn() as & Impure)
 
 
     pub def optional(mx: MatchEvaluator[a]): MatchEvaluator[Option[a]] =
@@ -138,103 +139,103 @@ namespace Text/Regex/MatchEvaluator {
         })
 
 
-    pub def content(): MatchEvaluator[String] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.group)
+    pub def content(): MatchEvaluator[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
 
     /// TODO - is this worthwhile?
-    pub def transformContent(f: String -> a): MatchEvaluator[a] & Impure = map(f, content())
+    pub def transformContent(f: String -> a): MatchEvaluator[a] = map(f, content())
 
 
-    pub def getStart(): MatchEvaluator[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.start)
+    pub def getStart(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
 
-    pub def getEnd(): MatchEvaluator[Int32] & Impure = liftPrimResult(Text/Regex/Internal/Matcher.end)
+    pub def getEnd(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.end)
 
-    pub def getLength(): MatchEvaluator[Int32] & Impure =
+    pub def getLength(): MatchEvaluator[Int32] =
         lift2((x,y) -> y - x, getStart(), getEnd()) `swapError` "getLength"
 
     ///
     ///
-    pub def getRange(): MatchEvaluator[(Int32, Int32)] & Impure =
+    pub def getRange(): MatchEvaluator[(Int32, Int32)] =
         lift2((x,y) -> (x,y), getStart(), getEnd()) `swapError` "getRange"
 
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
-    pub def getCaptureAt(ix: Int32): MatchEvaluator[String] & Impure =
+    pub def getCaptureAt(ix: Int32): MatchEvaluator[String] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithIndex(x, ix+1)) `swapError` "getCaptureAt - ${ix}"
 
-    pub def getCaptureNamed(label: String): MatchEvaluator[String] & Impure =
+    pub def getCaptureNamed(label: String): MatchEvaluator[String] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithLabel(x, label)) `swapError` "getCaptureNamed - '${label}'"
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
-    pub def getCaptureAtStart(ix: Int32): MatchEvaluator[Int32] & Impure =
+    pub def getCaptureAtStart(ix: Int32): MatchEvaluator[Int32] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithIndex(x, ix+1))
 
-    pub def getCaptureNamedStart(label: String): MatchEvaluator[Int32] & Impure =
+    pub def getCaptureNamedStart(label: String): MatchEvaluator[Int32] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithLabel(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
-    pub def getCaptureAtEnd(ix: Int32): MatchEvaluator[Int32] & Impure =
+    pub def getCaptureAtEnd(ix: Int32): MatchEvaluator[Int32] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithIndex(x, ix+1))
 
-    pub def getCaptureNamedEnd(label: String): MatchEvaluator[Int32] & Impure =
+    pub def getCaptureNamedEnd(label: String): MatchEvaluator[Int32] =
         liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithLabel(x, label))
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)`
     /// uses 1-indexing.
     ///
-    pub def getCaptureAtRange(ix: Int32): MatchEvaluator[(Int32, Int32)] & Impure =
+    pub def getCaptureAtRange(ix: Int32): MatchEvaluator[(Int32, Int32)] =
         lift2((x,y) -> (x,y), getCaptureAtStart(ix), getCaptureAtEnd(ix)) `swapError` "getCaptureAtRange"
 
-    pub def getCaptureNamedRange(label: String): MatchEvaluator[(Int32, Int32)] & Impure =
+    pub def getCaptureNamedRange(label: String): MatchEvaluator[(Int32, Int32)] =
         lift2((x,y) -> (x,y), getCaptureNamedStart(label), getCaptureNamedEnd(label))
 
 
     /// Note - type annos are a temporary fix while Flix's runtime cast error is resolved.
 
-    pub def getInt8At(ix: Int32): MatchEvaluator[Int8] & Impure =
+    pub def getInt8At(ix: Int32): MatchEvaluator[Int8] =
         let* str = getCaptureAt(ix);
         liftOption(fromString(str): Option[Int8], "getInt8At(${ix})")
 
-    pub def getInt8Named(label: String): MatchEvaluator[Int8] & Impure =
+    pub def getInt8Named(label: String): MatchEvaluator[Int8] =
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[Int8], "getInt8Named('${label}')")
 
-    pub def getInt16At(ix: Int32): MatchEvaluator[Int16] & Impure =
+    pub def getInt16At(ix: Int32): MatchEvaluator[Int16] =
         let* str = getCaptureAt(ix);
         liftOption(fromString(str): Option[Int16], "getInt16At(${ix})")
 
-    pub def getInt16Named(label: String): MatchEvaluator[Int16] & Impure =
+    pub def getInt16Named(label: String): MatchEvaluator[Int16] =
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[Int16], "getInt16Named('${label}')")
 
-    pub def getInt32At(ix: Int32): MatchEvaluator[Int32] & Impure =
+    pub def getInt32At(ix: Int32): MatchEvaluator[Int32] =
         let* str = getCaptureAt(ix);
         liftOption(fromString(str): Option[Int32], "getInt32At(${ix})")
 
-    pub def getInt32Named(label: String): MatchEvaluator[Int32] & Impure =
+    pub def getInt32Named(label: String): MatchEvaluator[Int32] =
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[Int32], "getInt32Named('${label}')")
 
-    pub def getInt64At(ix: Int32): MatchEvaluator[Int64] & Impure =
+    pub def getInt64At(ix: Int32): MatchEvaluator[Int64] =
         let* str = getCaptureAt(ix);
         liftOption(fromString(str): Option[Int64], "getInt64At(${ix})")
 
-    pub def getInt64Named(label: String): MatchEvaluator[Int64] & Impure =
+    pub def getInt64Named(label: String): MatchEvaluator[Int64] =
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[Int64], "getInt64Named('${label}')")
 
-    pub def getBigIntAt(ix: Int32): MatchEvaluator[BigInt] & Impure =
+    pub def getBigIntAt(ix: Int32): MatchEvaluator[BigInt] =
         let* str = getCaptureAt(ix);
         liftOption(fromString(str): Option[BigInt], "getBigIntAt(${ix})")
 
-    pub def getBigIntNamed(label: String): MatchEvaluator[BigInt] & Impure =
+    pub def getBigIntNamed(label: String): MatchEvaluator[BigInt] =
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[BigInt], "getBigIntNamed('${label}')")
 
