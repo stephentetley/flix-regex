@@ -33,6 +33,10 @@ namespace Text/Regex {
         pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]) : MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.ap(f, x)
     }
 
+    instance Monad[MatchEvaluator] {
+        pub def flatMap(f: a -> MatchEvaluator[b] & ef, o: MatchEvaluator[a]): MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.flatMap(f, o)
+    }
+
 }
 
 namespace Text/Regex/MatchEvaluator {
