@@ -28,9 +28,9 @@ namespace Text/Regex {
     }
 
     instance Applicative[MatchEvaluator] {
-        pub def point(x: a) : MatchEvaluator[a] = Text/Regex/MatchEvaluator.point(x)
+        pub def point(x: a): MatchEvaluator[a] = Text/Regex/MatchEvaluator.point(x)
 
-        pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]) : MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.ap(f, x)
+        pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]): MatchEvaluator[b] & ef = Text/Regex/MatchEvaluator.ap(f, x)
     }
 
     instance Monad[MatchEvaluator] {

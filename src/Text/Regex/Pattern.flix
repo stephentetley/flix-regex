@@ -40,7 +40,7 @@ namespace Text/Regex {
         /// Return the string representation of the Pattern `patt`.
         ///
         pub def fromString(regex: String): Option[Pattern] =
-            import java.util.regex.Pattern:compile(String);
+            import static java.util.regex.Pattern.compile(String);
             try {
                 Some(Pattern(compile(regex))) as & Pure
             } catch {
@@ -97,15 +97,15 @@ namespace Text/Regex/Pattern {
     }
 
     def toInt(flag: Flag): Int32 =
-        import get java.util.regex.Pattern:CANON_EQ as get_CANON_EQ;
-        import get java.util.regex.Pattern:CASE_INSENSITIVE as get_CASE_INSENSITIVE;
-        import get java.util.regex.Pattern:COMMENTS as get_COMMENTS;
-        import get java.util.regex.Pattern:DOTALL as get_DOTALL;
-        import get java.util.regex.Pattern:LITERAL as get_LITERAL;
-        import get java.util.regex.Pattern:MULTILINE as get_MULTILINE;
-        import get java.util.regex.Pattern:UNICODE_CASE as get_UNICODE_CASE;
-        import get java.util.regex.Pattern:UNICODE_CHARACTER_CLASS as get_UNICODE_CHARACTER_CLASS;
-        import get java.util.regex.Pattern:UNIX_LINES as get_UNIX_LINES;
+        import static get java.util.regex.Pattern.CANON_EQ as get_CANON_EQ;
+        import static get java.util.regex.Pattern.CASE_INSENSITIVE as get_CASE_INSENSITIVE;
+        import static get java.util.regex.Pattern.COMMENTS as get_COMMENTS;
+        import static get java.util.regex.Pattern.DOTALL as get_DOTALL;
+        import static get java.util.regex.Pattern.LITERAL as get_LITERAL;
+        import static get java.util.regex.Pattern.MULTILINE as get_MULTILINE;
+        import static get java.util.regex.Pattern.UNICODE_CASE as get_UNICODE_CASE;
+        import static get java.util.regex.Pattern.UNICODE_CHARACTER_CLASS as get_UNICODE_CHARACTER_CLASS;
+        import static get java.util.regex.Pattern.UNIX_LINES as get_UNIX_LINES;
         match flag {
             case CanonEq                => get_CANON_EQ()
             case CaseInsenstive         => get_CASE_INSENSITIVE()
@@ -135,7 +135,7 @@ namespace Text/Regex/Pattern {
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
     pub def compile(regex: String): Result[Pattern, String] =
-        import java.util.regex.Pattern:compile(String);
+        import static java.util.regex.Pattern.compile(String);
         try {
             Ok(Pattern(compile(regex))) as & Pure
         } catch {
@@ -150,7 +150,7 @@ namespace Text/Regex/Pattern {
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
     pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, String] =
-        import java.util.regex.Pattern:compile(String, Int32);
+        import static java.util.regex.Pattern.compile(String, Int32);
         try {
             Ok(Pattern(compile(regex, sumFlags(flags)))) as & Pure
         } catch {
@@ -165,7 +165,7 @@ namespace Text/Regex/Pattern {
     /// and you need to avoid wrapping it in an `Ok`.
     ///
     pub def irrefutablePattern(regex: String): Pattern =
-        import java.util.regex.Pattern:compile(String);
+        import static java.util.regex.Pattern.compile(String);
         try {
             Pattern(compile(regex)) as & Pure
         } catch {
@@ -176,7 +176,7 @@ namespace Text/Regex/Pattern {
     /// Return the unmatchable pattern - a pattern that will not match any input.
     ///
     pub def unmatchable(): Pattern =
-        import java.util.regex.Pattern:compile(String);
+        import static java.util.regex.Pattern.compile(String);
         try {
             Pattern(compile("^\\b$")) as & Pure
         } catch {
@@ -185,7 +185,7 @@ namespace Text/Regex/Pattern {
 
 
     pub def quote(s: String): String =
-        import java.util.regex.Pattern:quote(String);
+        import static java.util.regex.Pattern.quote(String);
         quote(s) as & Pure
 
 

@@ -35,6 +35,7 @@ namespace Text/Regex {
     ///
     /// Returns `true` if the string `input` is matched by the regular expression pattern `patt` at any point.
     ///
+    /// TODO - flip args?
     pub def contains(input: String, patt: Pattern): Bool =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
