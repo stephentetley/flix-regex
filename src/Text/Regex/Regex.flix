@@ -305,7 +305,7 @@ namespace Text/Regex {
     ///
     pub def countMatches(patt: Pattern, s: String): Int32 =
         Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
-            |> flip(Result.getWithDefault, 0)
+            |> Result.getWithDefault(0)
 
     def countMatcher(n: Int32): Matcher[Int32] & Impure =
         use Text/Regex/Matcher.{flatMap, find, point};
