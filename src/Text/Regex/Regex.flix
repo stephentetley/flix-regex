@@ -35,7 +35,7 @@ namespace Text/Regex {
     ///
     /// Returns `true` if the string `input` is matched by the regular expression pattern `patt` at any point.
     ///
-    /// TODO - flip args?
+    /// TODO - flip args? But then the name is not so good...
     pub def contains(input: String, patt: Pattern): Bool =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
@@ -110,10 +110,10 @@ namespace Text/Regex {
     pub def evalStartsWithOption(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
         evalWithTestOption(Text/Regex/Internal/Matcher.lookingAt, patt, eval, input)
 
-    def boundedWithTest(test: ##java.util.regex.Matcher -> Bool & ef, 
-                        start: Int32, 
-                        end: Int32, 
-                        patt: Pattern, 
+    def boundedWithTest(test: ##java.util.regex.Matcher -> Bool & ef,
+                        start: Int32,
+                        end: Int32,
+                        patt: Pattern,
                         input: String): Option[String] & Impure =
         use Option.flatMap;
         let Pattern(patt1) = patt;
@@ -156,7 +156,7 @@ namespace Text/Regex {
         let* _ = Text/Regex/Internal/Matcher.region(m1, start, end);
         if (test(m1)) {
             let MatchEvaluator(fn) = eval;
-            fn(m1) 
+            fn(m1)
         } else
             Err("evalBoundedWithTest - no match")
 
@@ -178,47 +178,47 @@ namespace Text/Regex {
             Ok(None)
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedMatches(start: Int32, 
-                                end: Int32, 
-                                patt: Pattern, 
-                                eval: MatchEvaluator[a], 
+    pub def evalBoundedMatches(start: Int32,
+                                end: Int32,
+                                patt: Pattern,
+                                eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
         evalBoundedWithTest(Text/Regex/Internal/Matcher.matches, start, end, patt, eval, input)
 
-    pub def evalBoundedMatchesOption(start: Int32, 
-                                    end: Int32, 
-                                    patt: Pattern, 
-                                    eval: MatchEvaluator[a], 
+    pub def evalBoundedMatchesOption(start: Int32,
+                                    end: Int32,
+                                    patt: Pattern,
+                                    eval: MatchEvaluator[a],
                                     input: String): Result[Option[a], String] & Impure =
         evalBoundedWithTestOption(Text/Regex/Internal/Matcher.matches, start, end, patt, eval, input)
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedContains(start: Int32, 
-                                end: Int32, 
-                                patt: Pattern, 
-                                eval: MatchEvaluator[a], 
+    pub def evalBoundedContains(start: Int32,
+                                end: Int32,
+                                patt: Pattern,
+                                eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
         evalBoundedWithTest(Text/Regex/Internal/Matcher.find, start, end, patt, eval, input)
 
-    pub def evalBoundedContainsOption(start: Int32, 
-                                        end: Int32, 
-                                        patt: Pattern, 
-                                        eval: MatchEvaluator[a], 
+    pub def evalBoundedContainsOption(start: Int32,
+                                        end: Int32,
+                                        patt: Pattern,
+                                        eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
         evalBoundedWithTestOption(Text/Regex/Internal/Matcher.find, start, end, patt, eval, input)
 
     /// Match input within region, match must start at start of region...
-    pub def evalBoundedStartsWith(start: Int32, 
-                                    end: Int32, 
-                                    patt: Pattern, 
-                                    eval: MatchEvaluator[a], 
+    pub def evalBoundedStartsWith(start: Int32,
+                                    end: Int32,
+                                    patt: Pattern,
+                                    eval: MatchEvaluator[a],
                                     input: String): Result[a, String] & Impure =
         evalBoundedWithTest(Text/Regex/Internal/Matcher.lookingAt, start, end, patt, eval, input)
 
-    pub def evalBoundedStartsWithOption(start: Int32, 
-                                        end: Int32, 
-                                        patt: Pattern, 
-                                        eval: MatchEvaluator[a], 
+    pub def evalBoundedStartsWithOption(start: Int32,
+                                        end: Int32,
+                                        patt: Pattern,
+                                        eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
         evalBoundedWithTestOption(Text/Regex/Internal/Matcher.lookingAt, start, end, patt, eval, input)
 

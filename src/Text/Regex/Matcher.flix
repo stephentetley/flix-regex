@@ -33,7 +33,7 @@ namespace Text/Regex {
     }
 
     instance Monad[Matcher] {
-        pub def flatMap(k: a -> Matcher[b] & ef, ma: Matcher[a]) : Matcher[b] & ef = Text/Regex/Matcher.bind(ma, k)
+        pub def flatMap(k: a -> Matcher[b] & ef, ma: Matcher[a]) : Matcher[b] & ef = Text/Regex/Matcher.flatMap(k, ma)
     }
 
     /// Don't make Matcher Alternative because Matcher has imperative state (a handle) rather
@@ -113,32 +113,11 @@ namespace Text/Regex/Matcher {
 
     pub def flatMap(k: a -> Matcher[b] & ef, x: Matcher[a]): Matcher[b] & ef = bind(x, k)
 
-    pub def seqR(ma: Matcher[a], mb: Matcher[b]): Matcher[b] =
-        Matcher(r ->
-            match apply1(ma, r) {
-                case Ok(_) => apply1(mb, r)
-                case Err(e1) => Err(e1)
-            }
-        )
-
-    pub def seqL(ma: Matcher[a], mb: Matcher[b]): Matcher[a] =
-        Matcher(r ->
-            match apply1(ma, r) {
-                case Ok(a1) => match apply1(mb, r) {
-                    case Ok(_) => Ok(a1)
-                    case Err(e2) => Err(e2)
-                }
-                case Err(e1) => Err(e1)
-            }
-        )
-
     def liftPrim(fn : ##java.util.regex.Matcher -> a & Impure): Matcher[a] =
         Matcher(r -> Ok(fn(r)))
 
     def liftPrimResult(fn : ##java.util.regex.Matcher -> Result[a, String] & Impure): Matcher[a] =
         Matcher(r -> fn(r))
-
-    pub def ignore(x: Matcher[a]): Matcher[Unit] = map(_ -> (), x)
 
     pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
 
@@ -225,5 +204,5 @@ namespace Text/Regex/Matcher {
         use Chain.{empty, snoc, toList};
         map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
 
-}        
+}
 
