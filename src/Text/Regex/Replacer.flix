@@ -193,8 +193,8 @@ namespace Text/Regex/Replacer {
 
     pub def done(): Replacer[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    pub def setRegion!(start: Int32, end: Int32): Replacer[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, start, end))
+    pub def setRegion!(bounds: {start :: Int32, end :: Int32}): Replacer[Unit] =
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
 
     pub def setPattern!(patt: Pattern): Replacer[Unit] =
         let Pattern(patt1) = patt;
@@ -339,7 +339,7 @@ namespace Text/Regex/Replacer {
             appendTail!()
         }
 
-}        
+}
 
 
 

@@ -197,12 +197,15 @@ namespace Text/Regex/ResMatcher {
     pub def resetInput!(input: String): ResMatcher[Unit] =
         liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
-    pub def setRegion!(b: Int32, e: Int32): ResMatcher[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, b, e))
+    pub def setRegion!(bounds: {start :: Int32, end :: Int32}): ResMatcher[Unit] =
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
 
     pub def setPattern!(patt: Pattern): ResMatcher[Unit] =
         let Pattern(p1) = patt;
         liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
+
+
+    // TODO - if we have matchers returning multiple results, should they call `find` internally?
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: ResMatcher[a]): ResMatcher[ac] =
         if (n <= 0)
@@ -213,8 +216,9 @@ namespace Text/Regex/ResMatcher {
         }
 
     pub def count(n: Int32, ma: ResMatcher[a]): ResMatcher[List[a]] =
+        use Functor.{<$>};
         use Chain.{empty, snoc, toList};
-        map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
+        toList <$> countWith(flip(snoc), empty(), n, ma)
 
 
 }

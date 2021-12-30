@@ -185,8 +185,8 @@ namespace Text/Regex/Matcher {
     pub def resetInput!(input: String): Matcher[Unit] =
         liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
 
-    pub def setRegion!(b: Int32, e: Int32): Matcher[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, b, e))
+    pub def setRegion!(bounds: {start :: Int32, end :: Int32}): Matcher[Unit] =
+        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;
@@ -201,8 +201,9 @@ namespace Text/Regex/Matcher {
         }
 
     pub def count(n: Int32, ma: Matcher[a]): Matcher[List[a]] =
+        use Functor.{<$>};
         use Chain.{empty, snoc, toList};
-        map(toList, countWith((x, xs) -> snoc(xs, x), empty(), n, ma))
+        toList <$> countWith(flip(snoc), empty(), n, ma)
 
 }
 

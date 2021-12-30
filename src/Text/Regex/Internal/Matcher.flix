@@ -77,10 +77,10 @@ namespace Text/Regex/Internal/Matcher {
             case _: ##java.lang.Exception => Err("usePattern")
         }
 
-    pub def region(x: ##java.util.regex.Matcher, start: Int32, end: Int32): Result[Unit, String] & Impure =
+    pub def region(x: ##java.util.regex.Matcher, bounds: {start :: Int32, end :: Int32}): Result[Unit, String] & Impure =
         import java.util.regex.Matcher.region(Int32, Int32);
         try {
-            region(x, start, end);
+            region(x, bounds.start, bounds.end);
             Ok()
         } catch {
             case _: ##java.lang.Exception => Err("region")
@@ -112,7 +112,7 @@ namespace Text/Regex/Internal/Matcher {
         }
 
 
-    /// 
+    ///
     /// Returns the number of capture groups in the pattern used by this PrimMatcher.
     ///
     /// This is not the number of groups matched, which should be all groups in a pattern
@@ -173,14 +173,14 @@ namespace Text/Regex/Internal/Matcher {
             case _: ##java.lang.Exception => Err("endWithLabel")
         }
 
-    /// 
+    ///
     pub def appendReplacement(x: ##java.util.regex.Matcher, sb: StringBuilder, rep: String): Result[Unit, String] & Impure =
-        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String);    
+        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String);
         try {
             let StringBuilder(sb1) = sb;
             let _ = appendReplacement(x, sb1, rep);
             Ok()
-        } catch { 
+        } catch {
             case _: ##java.lang.Exception => Err("appendReplacement")
         }
 
