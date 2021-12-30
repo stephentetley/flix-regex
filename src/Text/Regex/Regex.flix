@@ -33,7 +33,8 @@ namespace Text/Regex {
         Text/Regex/Internal/Matcher.matches(m1) as & Pure
 
     ///
-    /// Returns `true` if the string `input` is matched by the regular expression pattern `patt` at any point.
+    /// Returns `true` if the string `input` is matched by the regular expression pattern `patt`
+    /// at any position within the string.
     ///
     pub def contains(patt: Pattern, input: String): Bool =
         let Pattern(patt1) = patt;
@@ -255,33 +256,33 @@ namespace Text/Regex {
     ///
     /// Stream...
     ///
-    pub def rangeResults(patt: Pattern, input: String): Result[List[(Int32, Int32)], String] & Impure =
+    pub def rangeResults(patt: Pattern, input: String): Result[List[{start :: Int32, end :: Int32}], String] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 
     ///
-    /// Returns `input` with every match of the pattern `patt` replaced by the string `rep`.
+    /// Returns `input` with every match of the pattern `from` replaced by the string `to`.
     ///
-    pub def replace(patt: Pattern, rep: String, input: String): String =
-        let Pattern(patt1) = patt;
+    pub def replace(from: {from :: Pattern}, to: {to :: String}, input: String): String =
+        let Pattern(patt1) = from.from;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
-        Text/Regex/Internal/Matcher.replaceAll(m1, rep) as & Pure
+        Text/Regex/Internal/Matcher.replaceAll(m1, to.to) as & Pure
 
     ///
     /// Returns `input` with the first match of the regular expression `patt` replaced by the string `rep`.
     ///
-    pub def replaceFirstMatch(patt: Pattern, rep: String, input: String): String =
-        let Pattern(patt1) = patt;
+    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, input: String): String =
+        let Pattern(patt1) = from.from;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
-        Text/Regex/Internal/Matcher.replaceFirst(m1, rep) as & Pure
+        Text/Regex/Internal/Matcher.replaceFirst(m1, to.to) as & Pure
 
     ///
     /// Rewrite the string `input` by applying the function `f` to the
     /// substring produced by each match of the pattern `patt`.
     ///
-    pub def rewriteWith(patt: Pattern, eval: MatchEvaluator[String], input: String): Result[String, String] & Impure =
+    pub def rewriteWith(from: {from :: Pattern}, to: {to :: MatchEvaluator[String]}, input: String): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer, evalRewriteAll!};
-        execReplacer(evalRewriteAll!(eval), patt, input)
+        execReplacer(evalRewriteAll!(to.to), from.from, input)
 
     ///
     /// Rewrite the string `input` by apply the function `f` to the substring produced by each match of the pattern `patt`.

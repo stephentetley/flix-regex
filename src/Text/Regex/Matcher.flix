@@ -192,6 +192,8 @@ namespace Text/Regex/Matcher {
         let Pattern(p1) = patt;
         liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
 
+
+
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Matcher[a]): Matcher[ac] =
         if (n <= 0)
             point(acc)
