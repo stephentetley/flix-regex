@@ -27,7 +27,7 @@ namespace Text/Regex {
     ///
     /// Note - use `contains` to search for a substring.
     ///
-    pub def matches(patt: Pattern, input: String): Bool =
+    pub def isMatch(patt: Pattern, input: String): Bool =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
         Text/Regex/Internal/Matcher.matches(m1) as & Pure
@@ -36,7 +36,7 @@ namespace Text/Regex {
     /// Returns `true` if the string `input` is matched by the regular expression pattern `patt`
     /// at any position within the string.
     ///
-    pub def contains(patt: Pattern, input: String): Bool =
+    pub def isSubmatch(patt: Pattern, input: String): Bool =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
         Text/Regex/Internal/Matcher.find(m1) as & Pure
@@ -48,6 +48,18 @@ namespace Text/Regex {
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Matcher.new(patt1, input) as & Pure;
         Text/Regex/Internal/Matcher.lookingAt(m1) as & Pure
+
+    ///
+    /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
+    ///
+    /// Note this rewrites the pattern to end with the "$" boundary matcher and changes flags
+    /// to use `Multiline`.
+    ///
+    pub def endsWith(patt: Pattern, input: String): Bool =
+        match Text/Regex/Pattern.modifyPattern(s -> s + "$" , patt) {
+            case Err(_) => false
+            case Ok(patt2) => isSubmatch(patt2, input)
+        }
 
     // Design note - if a function uses a MatchEvaluator it should return `Result[a, String]` rather than `Option[a]`
     // as MatchEvaluator has user supplied error messages.

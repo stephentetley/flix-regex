@@ -55,7 +55,7 @@ namespace Text/Regex/Pattern {
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 
-    pub enum Flag {
+    pub enum Flag with Eq, Order, ToString {
         case CanonEq,
         case CaseInsenstive,
         case Comments,
@@ -67,34 +67,6 @@ namespace Text/Regex/Pattern {
         case UnixLines
     }
 
-    instance ToString[Flag] {
-        pub def toString(x: Flag): String = match x {
-            case CanonEq => "CanonEq"
-            case CaseInsenstive => "CaseInsenstive"
-            case Comments => "Comments"
-            case Dotall => "Dotall"
-            case Literal => "Literal"
-            case Multiline => "Multiline"
-            case UnicodeCase => "UnicodeCase"
-            case UnicodeCharacterClass => "UnicodeCharacterClass"
-            case UnixLines => "UnixLines"
-        }
-    }
-
-    instance Eq[Flag] {
-        pub def eq(x: Flag, y: Flag): Bool = match (x, y) {
-            case (CanonEq, CanonEq) => true
-            case (CaseInsenstive, CaseInsenstive) => true
-            case (Comments, Comments) => true
-            case (Dotall, Dotall) => true
-            case (Literal, Literal) => true
-            case (Multiline, Multiline) => true
-            case (UnicodeCase, UnicodeCase) => true
-            case (UnicodeCharacterClass, UnicodeCharacterClass) => true
-            case (UnixLines, UnixLines) => true
-            case (_, _) => false
-        }
-    }
 
     def toInt(flag: Flag): Int32 =
         import static get java.util.regex.Pattern.CANON_EQ as get_CANON_EQ;
@@ -207,5 +179,15 @@ namespace Text/Regex/Pattern {
         let Pattern(p1) = patt;
         let i = flags(p1) as & Pure;
         listFlags(i)
+
+    ///
+    /// Recompile the pattern `patt`, modifying its source pattern with `f`.
+    ///
+    pub def modifyPattern(f: String -> String, patt: Pattern): Result[Pattern, String] =
+        let flags = getFlags(patt);
+        let src = getPattern(patt);
+        compileWithFlags(f(src), Multiline :: flags)
+
+
 
 }
