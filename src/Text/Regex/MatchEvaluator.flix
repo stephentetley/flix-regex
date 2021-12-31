@@ -147,16 +147,16 @@ namespace Text/Regex/MatchEvaluator {
         })
 
 
-    pub def content(): MatchEvaluator[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
+    pub def content(): MatchEvaluator[String] = liftPrimResult(Text/Regex/Internal/Prim.group)
 
     /// TODO - is this worthwhile?
     pub def transformContent(f: String -> a): MatchEvaluator[a] = map(f, content())
 
 
-    pub def getStart(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
+    pub def getStart(): MatchEvaluator[Int32] = liftPrimResult(Text/Regex/Internal/Prim.start)
 
     pub def getEnd(): MatchEvaluator[Int32] =
-        liftPrimResult(Text/Regex/Internal/Matcher.end)
+        liftPrimResult(Text/Regex/Internal/Prim.end)
 
     pub def getLength(): MatchEvaluator[Int32] =
         liftA2((x,y) -> y - x, getStart(), getEnd()) |> swapError("getLength")
@@ -171,22 +171,22 @@ namespace Text/Regex/MatchEvaluator {
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureAt(ix: Int32): MatchEvaluator[String] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithIndex(x, ix+1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.groupWithIndex(x, ix+1))
             |> swapError("getCaptureAt(${ix})")
 
     pub def getCaptureNamed(label: String): MatchEvaluator[String] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.groupWithLabel(x, label))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.groupWithLabel(x, label))
             |> swapError("getCaptureNamed('${label}')")
 
     ///
     /// Note - this function uses 0-indexing, the equivalent Java method `group(int group)` uses 1-indexing.
     ///
     pub def getCaptureStartAt(ix: Int32): MatchEvaluator[Int32] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithIndex(x, ix+1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.startWithIndex(x, ix+1))
             |> swapError("getCaptureStartAt(${ix})")
 
     pub def getCaptureStartNamed(label: String): MatchEvaluator[Int32] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.startWithLabel(x, label))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.startWithLabel(x, label))
             |> swapError("getCaptureStartNamed('${label}')")
 
     ///
@@ -194,11 +194,11 @@ namespace Text/Regex/MatchEvaluator {
     /// uses 1-indexing.
     ///
     pub def getCaptureEndAt(ix: Int32): MatchEvaluator[Int32] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithIndex(x, ix+1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.endWithIndex(x, ix+1))
             |> swapError("getCaptureEndAt(${ix})")
 
     pub def getCaptureEndNamed(label: String): MatchEvaluator[Int32] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.endWithLabel(x, label))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.endWithLabel(x, label))
             |> swapError("getCaptureEndNamed('${label}')")
 
     ///

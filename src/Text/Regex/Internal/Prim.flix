@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/// To replace Internal/PrimMatcher...
 
-namespace Text/Regex/Internal/Matcher {
+namespace Text/Regex/Internal/Prim {
 
 
     ///
-    /// Create a matcher for Pattern `patt` on the source String `input`.
+    /// Create a Matcher for Pattern `patt` on the source String `input`.
     ///
-    pub def new(patt: ##java.util.regex.Pattern, input: String): ##java.util.regex.Matcher & Impure =
+    pub def newMatcher(patt: ##java.util.regex.Pattern, input: String): ##java.util.regex.Matcher & Impure =
         import java.util.regex.Pattern.matcher(##java.lang.CharSequence);
         let cs1 = input as ##java.lang.CharSequence;
         matcher(patt, cs1)
@@ -77,7 +76,7 @@ namespace Text/Regex/Internal/Matcher {
             case _: ##java.lang.Exception => Err("usePattern")
         }
 
-    pub def region(x: ##java.util.regex.Matcher, bounds: {start :: Int32, end :: Int32}): Result[Unit, String] & Impure =
+    pub def setRegion!(x: ##java.util.regex.Matcher, bounds: {start :: Int32, end :: Int32}): Result[Unit, String] & Impure =
         import java.util.regex.Matcher.region(Int32, Int32);
         try {
             region(x, bounds.start, bounds.end);

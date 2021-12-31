@@ -54,7 +54,7 @@ namespace Text/Regex/Replacer {
         let sb = StringBuilder.new();
         let Replacer(rep1) = rep;
         let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
         /// Start index at -1 because we haven't found anything yet...
         match rep1(sb, m1, -1) {
             case Ok(a, _) => {
@@ -137,11 +137,11 @@ namespace Text/Regex/Replacer {
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
     pub def appendTail!(): Replacer[Unit] =
-        use Text/Regex/Internal/Matcher.{appendTail};
+        use Text/Regex/Internal/Prim.{appendTail};
         liftWriterPrim((m, sb) -> appendTail(m, sb))
 
     pub def appendReplacement!(rep: String): Replacer[Unit] =
-        use Text/Regex/Internal/Matcher.{appendReplacement};
+        use Text/Regex/Internal/Prim.{appendReplacement};
         liftWriterPrimResult((m, sb) -> appendReplacement(m, sb, rep))
 
     pub def getIndex(): Replacer[Int32] =
@@ -151,16 +151,16 @@ namespace Text/Regex/Replacer {
         Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)) as & Impure)
 
     pub def find(): Replacer[Bool] =
-        let* bfound = liftPrim(x -> Text/Regex/Internal/Matcher.find(x));
+        let* bfound = liftPrim(x -> Text/Regex/Internal/Prim.find(x));
         let* _ = incrementFinds!(bfound);
         point(bfound)
 
     pub def findFrom(start: Int32): Replacer[Bool] =
-        let* bfound = liftPrimResult(x -> Text/Regex/Internal/Matcher.findFrom(x, start));
+        let* bfound = liftPrimResult(x -> Text/Regex/Internal/Prim.findFrom(x, start));
         let* _ = incrementFinds!(bfound);
         point(bfound)
 
-    pub def content(): Replacer[String] = liftPrimResult(Text/Regex/Internal/Matcher.group)
+    pub def content(): Replacer[String] = liftPrimResult(Text/Regex/Internal/Prim.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): Replacer[a] =
         let MatchEvaluator(fn) = eval;
@@ -194,11 +194,11 @@ namespace Text/Regex/Replacer {
     pub def done(): Replacer[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
     pub def setRegion!(bounds: {start :: Int32, end :: Int32}): Replacer[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.setRegion!(x, bounds))
 
     pub def setPattern!(patt: Pattern): Replacer[Unit] =
         let Pattern(patt1) = patt;
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, patt1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern(x, patt1))
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Replacer[a]): Replacer[ac] =
         if (n <= 0)

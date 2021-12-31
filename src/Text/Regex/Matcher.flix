@@ -56,7 +56,7 @@ namespace Text/Regex/Matcher {
         use Result.flatMap;
         let Matcher(f) = ma;
         let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
         f(m1)
 
     ///
@@ -119,15 +119,15 @@ namespace Text/Regex/Matcher {
     def liftPrimResult(fn : ##java.util.regex.Matcher -> Result[a, String] & Impure): Matcher[a] =
         Matcher(r -> fn(r))
 
-    pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
+    pub def matches(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.matches)
 
-    pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
+    pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.lookingAt)
 
-    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.find)
+    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.find)
 
-    pub def start(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
+    pub def start(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.start)
 
-    pub def end(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.end)
+    pub def end(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.end)
 
     pub def findLast(): Matcher[Bool] =
         let* first = find();
@@ -146,7 +146,7 @@ namespace Text/Regex/Matcher {
 
 
     pub def findFrom(b: Int32): Matcher[Bool] =
-        liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
+        liftPrimResult(m1 -> Text/Regex/Internal/Prim.findFrom(m1, b))
 
 
     pub def findLastFrom(b: Int32): Matcher[Bool] =
@@ -158,7 +158,7 @@ namespace Text/Regex/Matcher {
         } else point(false)
 
     pub def content(): Matcher[String] =
-        liftPrimResult(Text/Regex/Internal/Matcher.group)
+        liftPrimResult(Text/Regex/Internal/Prim.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
         Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r))
@@ -180,17 +180,17 @@ namespace Text/Regex/Matcher {
 
     pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Matcher.reset)
+    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Prim.reset)
 
     pub def resetInput!(input: String): Matcher[Unit] =
-        liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
+        liftPrim(x -> Text/Regex/Internal/Prim.resetInput(x, input))
 
     pub def setRegion!(bounds: {start :: Int32, end :: Int32}): Matcher[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.setRegion!(x, bounds))
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern(x, p1))
 
 
 

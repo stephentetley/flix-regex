@@ -62,7 +62,7 @@ namespace Text/Regex/ResMatcher {
     pub def runResMatcher(ma: ResMatcher[a], patt: Pattern, input: String): Result[a, String] & Impure =
         use Result.flatMap;
         let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Matcher.new(patt1, input);
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
         def loop(rm) = match rm {
             case MatchError(msg) => Err(msg)
             case Done(a)         => Ok(a)
@@ -125,15 +125,15 @@ namespace Text/Regex/ResMatcher {
             case Ok(a)    => Done(a)
         })
 
-    pub def matches(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.matches)
+    pub def matches(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Prim.matches)
 
-    pub def lookingAt(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.lookingAt)
+    pub def lookingAt(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Prim.lookingAt)
 
-    pub def find(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Matcher.find)
+    pub def find(): ResMatcher[Bool] = liftPrim(Text/Regex/Internal/Prim.find)
 
-    pub def start(): ResMatcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.start)
+    pub def start(): ResMatcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.start)
 
-    pub def end(): ResMatcher[Int32] = liftPrimResult(Text/Regex/Internal/Matcher.end)
+    pub def end(): ResMatcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.end)
 
     pub def findLast(): ResMatcher[Bool] =
         let* first = find();
@@ -152,7 +152,7 @@ namespace Text/Regex/ResMatcher {
 
 
     pub def findFrom(b: Int32): ResMatcher[Bool] =
-        liftPrimResult(m1 -> Text/Regex/Internal/Matcher.findFrom(m1, b))
+        liftPrimResult(m1 -> Text/Regex/Internal/Prim.findFrom(m1, b))
 
 
     pub def findLastFrom(b: Int32): ResMatcher[Bool] =
@@ -165,7 +165,7 @@ namespace Text/Regex/ResMatcher {
 
 
     pub def content(): ResMatcher[String] =
-        liftPrimResult(Text/Regex/Internal/Matcher.group)
+        liftPrimResult(Text/Regex/Internal/Prim.group)
 
     pub def evaluate(eval: MatchEvaluator[a]): ResMatcher[a] =
         Pause(r -> match Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r) {
@@ -192,17 +192,17 @@ namespace Text/Regex/ResMatcher {
 
     pub def done(): ResMatcher[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    pub def reset!(): ResMatcher[Unit] = liftPrim(Text/Regex/Internal/Matcher.reset)
+    pub def reset!(): ResMatcher[Unit] = liftPrim(Text/Regex/Internal/Prim.reset)
 
     pub def resetInput!(input: String): ResMatcher[Unit] =
-        liftPrim(x -> Text/Regex/Internal/Matcher.resetInput(x, input))
+        liftPrim(x -> Text/Regex/Internal/Prim.resetInput(x, input))
 
     pub def setRegion!(bounds: {start :: Int32, end :: Int32}): ResMatcher[Unit] =
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.region(x, bounds))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.setRegion!(x, bounds))
 
     pub def setPattern!(patt: Pattern): ResMatcher[Unit] =
         let Pattern(p1) = patt;
-        liftPrimResult(x -> Text/Regex/Internal/Matcher.usePattern(x, p1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern(x, p1))
 
 
     // TODO - if we have matchers returning multiple results, should they call `find` internally?
