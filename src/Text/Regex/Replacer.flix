@@ -137,12 +137,10 @@ namespace Text/Regex/Replacer {
         Replacer((sb, m, n) -> Result.map(x -> (x, n), fn(m, sb)))
 
     pub def appendTail!(): Replacer[Unit] =
-        use Text/Regex/Internal/Prim.{appendTail};
-        liftWriterPrim((m, sb) -> appendTail(m, sb))
+        liftWriterPrim((m, sb) -> Text/Regex/Internal/Prim.appendTail!(m, sb))
 
     pub def appendReplacement!(rep: String): Replacer[Unit] =
-        use Text/Regex/Internal/Prim.{appendReplacement};
-        liftWriterPrimResult((m, sb) -> appendReplacement(m, sb, rep))
+        liftWriterPrimResult((m, sb) -> Text/Regex/Internal/Prim.appendReplacement!(m, sb, rep))
 
     pub def getIndex(): Replacer[Int32] =
         Replacer((_, _, n) -> Ok((n, n)) as & Impure)
@@ -151,12 +149,12 @@ namespace Text/Regex/Replacer {
         Replacer((_, _, n) -> Ok(((), if (incr) n + 1 else n)) as & Impure)
 
     pub def find(): Replacer[Bool] =
-        let* bfound = liftPrim(x -> Text/Regex/Internal/Prim.find(x));
+        let* bfound = liftPrim(x -> Text/Regex/Internal/Prim.find!(x));
         let* _ = incrementFinds!(bfound);
         point(bfound)
 
     pub def findFrom(start: Int32): Replacer[Bool] =
-        let* bfound = liftPrimResult(x -> Text/Regex/Internal/Prim.findFrom(x, start));
+        let* bfound = liftPrimResult(x -> Text/Regex/Internal/Prim.findFrom!(x, start));
         let* _ = incrementFinds!(bfound);
         point(bfound)
 
@@ -198,7 +196,7 @@ namespace Text/Regex/Replacer {
 
     pub def setPattern!(patt: Pattern): Replacer[Unit] =
         let Pattern(patt1) = patt;
-        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern(x, patt1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern!(x, patt1))
 
     pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Replacer[a]): Replacer[ac] =
         if (n <= 0)

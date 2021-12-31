@@ -39,7 +39,7 @@ namespace Text/Regex {
     pub def isSubmatch(patt: Pattern, input: String): Bool =
         let Pattern(patt1) = patt;
         let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.find(m1) as & Pure
+        Text/Regex/Internal/Prim.find!(m1) as & Pure
 
     ///
     /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
@@ -87,19 +87,16 @@ namespace Text/Regex {
     /// Need to investigate why they were written this way, before changing them.
     /// Match input within region, match must start at start of region...
     pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        use Text/Regex/Internal/Prim.{matches};
-        boundedWithTest(matches, bounds, patt, input)
+        boundedWithTest(Text/Regex/Internal/Prim.matches, bounds, patt, input)
 
     /// Match input within region, match must start at start of region...
     pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        use Text/Regex/Internal/Prim.{find};
-        boundedWithTest(find, bounds, patt, input)
+        boundedWithTest(Text/Regex/Internal/Prim.find!, bounds, patt, input)
 
 
     /// Match input within region, match must start at start of region...
     pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        use Text/Regex/Internal/Prim.{lookingAt};
-        boundedWithTest(lookingAt, bounds, patt, input)
+        boundedWithTest(Text/Regex/Internal/Prim.lookingAt, bounds, patt, input)
 
 
 
@@ -155,11 +152,11 @@ namespace Text/Regex {
     /// so this function is impure.
     ///
     pub def evalContains(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Prim.find, patt, eval, input)
+        evalWithTest(Text/Regex/Internal/Prim.find!, patt, eval, input)
 
     /// Returns `Ok(None)` on no match
     pub def evalContainsOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evalWithTestOptional(Text/Regex/Internal/Prim.find, patt, eval, input)
+        evalWithTestOptional(Text/Regex/Internal/Prim.find!, patt, eval, input)
 
     /// Input matches at least once (left to right)...
     pub def evalStartsWith(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
@@ -233,13 +230,13 @@ namespace Text/Regex {
                                 patt: Pattern,
                                 eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Prim.find, bounds, patt, eval, input)
+        evalBoundedWithTest(Text/Regex/Internal/Prim.find!, bounds, patt, eval, input)
 
     pub def evalBoundedContainsOptional(bounds: {start :: Int32, end :: Int32},
                                         patt: Pattern,
                                         eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
-        evalBoundedWithTestOptional(Text/Regex/Internal/Prim.find, bounds, patt, eval, input)
+        evalBoundedWithTestOptional(Text/Regex/Internal/Prim.find!, bounds, patt, eval, input)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedStartsWith(bounds: {start :: Int32, end :: Int32},
@@ -279,7 +276,7 @@ namespace Text/Regex {
         let Pattern(patt1) = patt;
         let MatchEvaluator(eval1) = eval;
         let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let iter = _ -> match Text/Regex/Internal/Prim.find(m1) {
+        let iter = _ -> match Text/Regex/Internal/Prim.find!(m1) {
             case true  => eval1(m1) |> Result.map(Some)
             case false => Ok(None)
         };
@@ -340,8 +337,8 @@ namespace Text/Regex {
             |> Result.getWithDefault(0)
 
     def countMatcher(n: Int32): Matcher[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find, point};
-        let* first = find();
+        use Text/Regex/Matcher.{flatMap, find!, point};
+        let* first = find!();
         if (first) countMatcher(n+1) else point(n)
 
 
@@ -355,9 +352,9 @@ namespace Text/Regex {
     pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] = indexOfLeftHelper(patt, s) as & Pure
 
     def indexOfLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find, start, throwError};
+        use Text/Regex/Matcher.{flatMap, find!, start, throwError};
         let m1 = {
-            let* bfound = find();
+            let* bfound = find!();
             if (bfound) start() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
@@ -365,9 +362,9 @@ namespace Text/Regex {
     pub def indexOfRight(patt: Pattern, s: String): Option[Int32] = indexOfRightHelper(patt, s) as & Pure
 
     def indexOfRightHelper(patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findLast, start, throwError};
+        use Text/Regex/Matcher.{flatMap, findLast!, start, throwError};
         let m1 = {
-            let* bfound = findLast();
+            let* bfound = findLast!();
             if (bfound) start() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
@@ -376,9 +373,9 @@ namespace Text/Regex {
     pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] = indexOfEndLeftHelper(patt, s) as & Pure
 
     def indexOfEndLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find, end, throwError};
+        use Text/Regex/Matcher.{flatMap, find!, end, throwError};
         let m1 = {
-            let* bfound = find();
+            let* bfound = find!();
             if (bfound) end() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
@@ -393,9 +390,9 @@ namespace Text/Regex {
         indexOfLeftWithOffsetHelper(patt, offset, s) as & Pure
 
     def indexOfLeftWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findFrom, start, throwError};
+        use Text/Regex/Matcher.{flatMap, findFrom!, start, throwError};
         let m1 = {
-            let* bfound = findFrom(offset);
+            let* bfound = findFrom!(offset);
             if (bfound) start() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
@@ -409,9 +406,9 @@ namespace Text/Regex {
         indexOfRightWithOffsetHelper(patt, offset, s) as & Pure
 
     def indexOfRightWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findLastFrom, start, throwError};
+        use Text/Regex/Matcher.{flatMap, findLastFrom!, start, throwError};
         let m1 = {
-            let* bfound = findLastFrom(offset);
+            let* bfound = findLastFrom!(offset);
             if (bfound) start() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption

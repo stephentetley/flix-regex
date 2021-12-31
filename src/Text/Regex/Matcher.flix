@@ -123,38 +123,38 @@ namespace Text/Regex/Matcher {
 
     pub def lookingAt(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.lookingAt)
 
-    pub def find(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.find)
+    pub def find!(): Matcher[Bool] = liftPrim(Text/Regex/Internal/Prim.find!)
 
     pub def start(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.start)
 
     pub def end(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.end)
 
-    pub def findLast(): Matcher[Bool] =
-        let* first = find();
+    pub def findLast!(): Matcher[Bool] =
+        let* first = find!();
         if (first) {
             let* pos = start();
             let* endpos = findLastHelper(pos);
-            findFrom(endpos - 1)
+            findFrom!(endpos - 1)
         } else point(false)
 
     def findLastHelper(lastPos: Int32): Matcher[Int32] =
-        let* more = find();
+        let* more = find!();
         if (more) {
             let* pos = start();
             findLastHelper(pos)
         } else point(lastPos)
 
 
-    pub def findFrom(b: Int32): Matcher[Bool] =
-        liftPrimResult(m1 -> Text/Regex/Internal/Prim.findFrom(m1, b))
+    pub def findFrom!(b: Int32): Matcher[Bool] =
+        liftPrimResult(m1 -> Text/Regex/Internal/Prim.findFrom!(m1, b))
 
 
-    pub def findLastFrom(b: Int32): Matcher[Bool] =
-        let* first = findFrom(b);
+    pub def findLastFrom!(b: Int32): Matcher[Bool] =
+        let* first = findFrom!(b);
         if (first) {
             let* pos = start();
             let* endpos = findLastHelper(pos);
-            findFrom(endpos - 1)
+            findFrom!(endpos - 1)
         } else point(false)
 
     pub def content(): Matcher[String] =
@@ -164,7 +164,7 @@ namespace Text/Regex/Matcher {
         Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r))
 
     pub def getMatch(): Matcher[String] =
-        let* ans = find();
+        let* ans = find!();
         if (ans)
             content()
         else
@@ -180,17 +180,17 @@ namespace Text/Regex/Matcher {
 
     pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Prim.reset)
+    pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Prim.reset!)
 
     pub def resetInput!(input: String): Matcher[Unit] =
-        liftPrim(x -> Text/Regex/Internal/Prim.resetInput(x, input))
+        liftPrim(x -> Text/Regex/Internal/Prim.resetInput!(x, input))
 
     pub def setRegion!(bounds: {start :: Int32, end :: Int32}): Matcher[Unit] =
         liftPrimResult(x -> Text/Regex/Internal/Prim.setRegion!(x, bounds))
 
     pub def setPattern!(patt: Pattern): Matcher[Unit] =
         let Pattern(p1) = patt;
-        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern(x, p1))
+        liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern!(x, p1))
 
 
 

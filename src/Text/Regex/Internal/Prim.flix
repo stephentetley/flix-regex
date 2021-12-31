@@ -46,7 +46,7 @@ namespace Text/Regex/Internal/Prim {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def find(x: ##java.util.regex.Matcher): Bool & Impure =
+    pub def find!(x: ##java.util.regex.Matcher): Bool & Impure =
         import java.util.regex.Matcher.find();
         find(x)
 
@@ -57,7 +57,7 @@ namespace Text/Regex/Internal/Prim {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findFrom(x: ##java.util.regex.Matcher, start: Int32): Result[Bool, String] & Impure =
+    pub def findFrom!(x: ##java.util.regex.Matcher, start: Int32): Result[Bool, String] & Impure =
         import java.util.regex.Matcher.find(Int32);
         try {
             Ok(find(x, start))
