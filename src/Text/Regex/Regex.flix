@@ -137,14 +137,15 @@ namespace Text/Regex {
     ///
     /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
     ///
-    /// Note this rewrites the pattern to end with the "$" boundary matcher and changes flags
-    /// to use `Multiline`.
+    /// This may be slower than `startsWith` because there is no primitive Java function
+    /// to call, instead the matches of `patt` are iterated until the last one is found.
     ///
     pub def endsWith(patt: Pattern, input: String): Bool =
-        match Text/Regex/Pattern.modifyPattern(s -> s + "$" , patt) {
-            case Err(_) => false
-            case Ok(patt2) => isSubmatch(patt2, input)
+        match rangeOfRight(patt, input) {
+            case None      => false
+            case Some(rng) => String.length(input) - 1 == rng.end
         }
+
 
 
     // # Simple extractors
@@ -406,6 +407,42 @@ namespace Text/Regex {
         indexOfHelper(Text/Regex/Matcher.findLast!(), Text/Regex/Matcher.end(), patt, s) as & Pure
 
 
+    ///
+    /// This is `indexOfLeft` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findFrom!(offset), Text/Regex/Matcher.start(), patt, s) as & Pure
+
+    ///
+    /// This is `indexOfRight` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findLastFrom!(offset), Text/Regex/Matcher.start(), patt, s) as & Pure
+
+    ///
+    /// This is `indexOfEndLeft` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfEndLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findFrom!(offset), Text/Regex/Matcher.end(), patt, s) as & Pure
+
+
+    /// TODO - does this function make sense - should it be before offset otherwise
+    /// it is practically the same as `indexOfEndRight`?
+    ///
+    /// This is `indexOfEndRight` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def indexOfEndRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findLastFrom!(offset), Text/Regex/Matcher.end(), patt, s) as & Pure
+
+
     def indexOfHelper(finder: Matcher[Bool], extract: Matcher[Int32], patt: Pattern, s: String): Option[Int32] & Impure =
         use Text/Regex/Matcher.{flatMap, find!, end, throwError};
         let m1 = {
@@ -414,9 +451,11 @@ namespace Text/Regex {
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
+    /// Range of leftmost match
     pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
         rangeOfHelper(Text/Regex/Matcher.find!(), patt, s) as & Pure
 
+    /// Range of rightmost match
     pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
         rangeOfHelper(Text/Regex/Matcher.findLast!(), patt, s) as & Pure
 
@@ -431,38 +470,6 @@ namespace Text/Regex {
 
 
 
-
-    ///
-    /// This is `indexOfLeft` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfLeftWithOffsetHelper(patt, offset, s) as & Pure
-
-    def indexOfLeftWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findFrom!, start, throwError};
-        let m1 = {
-            let* bfound = findFrom!(offset);
-            if (bfound) start() else throwError("none")
-        };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
-
-    ///
-    /// This is `indexOfRight` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfRightWithOffsetHelper(patt, offset, s) as & Pure
-
-    def indexOfRightWithOffsetHelper(patt: Pattern, offset: Int32, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findLastFrom!, start, throwError};
-        let m1 = {
-            let* bfound = findLastFrom!(offset);
-            if (bfound) start() else throwError("none")
-        };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
     ///
     /// Find the first instance of `patt` in string `s`, return a pair of the
@@ -501,8 +508,17 @@ namespace Text/Regex {
             case Some(rng) => (String.sliceLeft(rng.start, s), String.sliceRight(rng.start, s))
         }
 
-    /// stripPrefix
+    ///
+    /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
+    ///
+    pub def stripPrefix(patt: Pattern, s: String): Option[String] =
+        (rangeOfHelper(Text/Regex/Matcher.lookingAt(), patt, s) as & Pure)
+            |> Option.map(rng -> String.takeRight(rng.end, s))
 
     // stripSuffix
+    pub def stripSuffix(patt: Pattern, s: String): Option[String] =
+        rangeOfRight(patt, s)
+            |> Option.flatMap(rng -> if (String.length(s) - 1 == rng.end) Some(String.takeLeft(rng.start, s)) else None)
+
 
 }
