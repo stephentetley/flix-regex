@@ -129,6 +129,9 @@ namespace Text/Regex/Matcher {
 
     pub def end(): Matcher[Int32] = liftPrimResult(Text/Regex/Internal/Prim.end)
 
+    pub def range(): Matcher[{start :: Int32, end :: Int32}] =
+        Applicative.liftA2((s, e) -> {start = s, end = e}, start(), end())
+
     pub def findLast!(): Matcher[Bool] =
         let* first = find!();
         if (first) {
@@ -159,6 +162,7 @@ namespace Text/Regex/Matcher {
 
     pub def content(): Matcher[String] =
         liftPrimResult(Text/Regex/Internal/Prim.group)
+
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
         Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r))

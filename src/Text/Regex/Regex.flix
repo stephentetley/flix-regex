@@ -80,8 +80,8 @@ namespace Text/Regex {
 
     def evaluate(test: ##java.util.regex.Matcher -> Bool & ef,
                     modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                    eval: MatchEvaluator[a],
                     patt: Pattern,
+                    eval: MatchEvaluator[a],
                     input: String): Result[a, String] & Impure =
         use Result.flatMap;
         let Pattern(patt1) = patt;
@@ -96,8 +96,8 @@ namespace Text/Regex {
     /// Return `Option[a]` with None indicating "no match" (no match being necessarily an error).
     def evaluateOptional(test: ##java.util.regex.Matcher -> Bool & ef,
                             modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                            eval: MatchEvaluator[a],
                             patt: Pattern,
+                            eval: MatchEvaluator[a],
                             input: String): Result[Option[a], String] & Impure =
         use Result.flatMap;
         let Pattern(patt1) = patt;
@@ -215,14 +215,14 @@ namespace Text/Regex {
     /// so this function is impure.
     ///
     pub def evalMatches(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.matches, notModified, eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.matches, notModified, patt, eval, input)
 
     /// Whole input matches...
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     /// Returns `Ok(None)` on no match
     pub def evalMatchesOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.matches, notModified, eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.matches, notModified, patt, eval, input)
 
 
     /// Input matches at least once (left to right)...
@@ -231,19 +231,19 @@ namespace Text/Regex {
     /// so this function is impure.
     ///
     pub def evalContains(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.find!, notModified, eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.find!, notModified, patt, eval, input)
 
     /// Returns `Ok(None)` on no match
     pub def evalContainsOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.find!, notModified, eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.find!, notModified, patt, eval, input)
 
     /// Input matches at least once (left to right)...
     pub def evalStartsWith(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.lookingAt, notModified, eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.lookingAt, notModified, patt, eval, input)
 
     /// Returns `Ok(None)` on no match
     pub def evalStartsWithOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, notModified, eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, notModified, patt, eval, input)
 
 
 
@@ -252,57 +252,42 @@ namespace Text/Regex {
                                 patt: Pattern,
                                 eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.matches, setRegion!(bounds), eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, eval, input)
 
     pub def evalBoundedMatchesOptional(bounds: {start :: Int32, end :: Int32},
                                         patt: Pattern,
                                         eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.matches, setRegion!(bounds), eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, eval, input)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedContains(bounds: {start :: Int32, end :: Int32},
                                 patt: Pattern,
                                 eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.find!, setRegion!(bounds), eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, eval, input)
 
     pub def evalBoundedContainsOptional(bounds: {start :: Int32, end :: Int32},
                                         patt: Pattern,
                                         eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.find!, setRegion!(bounds), eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, eval, input)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedStartsWith(bounds: {start :: Int32, end :: Int32},
                                     patt: Pattern,
                                     eval: MatchEvaluator[a],
                                     input: String): Result[a, String] & Impure =
-        evaluate(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), eval, patt, input)
+        evaluate(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, eval, input)
 
     pub def evalBoundedStartsWithOptional(bounds: {start :: Int32, end :: Int32},
                                             patt: Pattern,
                                             eval: MatchEvaluator[a],
                                             input: String): Result[Option[a], String] & Impure =
-        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), eval, patt, input)
+        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, eval, input)
 
 
-    ///
-    /// Splits the string `s` around matches of the pattern `p`.
-    ///
-    pub def split(patt: Pattern, input: String): Array[String] & Impure =
-        import java.util.regex.Pattern.split(##java.lang.CharSequence);
-        let Pattern(p1) = patt;
-        let cs1 = input as ##java.lang.CharSequence;
-        split(p1, cs1)
-
-    ///
-    /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
-    ///
-    pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Array[String] & Impure =
-        let input1 = String.slice(bounds.start, bounds.end, input);
-        split(patt, input1)
-
+    // # Multiple results
 
     ///
     /// TODO: use a "Stream" when stdlib has an implementation finalized
@@ -330,6 +315,37 @@ namespace Text/Regex {
     pub def rangeResults(patt: Pattern, input: String): Result[List[{start :: Int32, end :: Int32}], String] & Impure =
         use Text/Regex/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
+
+    ///
+    /// Count the occurences of `patt` in string `s`.
+    ///
+    pub def countMatches(patt: Pattern, s: String): Int32 =
+        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
+            |> Result.getWithDefault(0)
+
+    def countMatcher(acc: Int32): Matcher[Int32] & Impure =
+        use Text/Regex/Matcher.{flatMap, find!, point};
+        let* first = find!();
+        if (first) countMatcher(acc+1) else point(acc)
+
+
+    // # String API functions using regexs
+
+    ///
+    /// Splits the string `s` around matches of the pattern `p`.
+    ///
+    pub def split(patt: Pattern, input: String): Array[String] & Impure =
+        import java.util.regex.Pattern.split(##java.lang.CharSequence);
+        let Pattern(p1) = patt;
+        let cs1 = input as ##java.lang.CharSequence;
+        split(p1, cs1)
+
+    ///
+    /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
+    ///
+    pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Array[String] & Impure =
+        let input1 = String.slice(bounds.start, bounds.end, input);
+        split(patt, input1)
 
     ///
     /// Returns `input` with every match of the pattern `from` replaced by the string `to`.
@@ -362,20 +378,6 @@ namespace Text/Regex {
         use Text/Regex/Replacer.{execReplacer, evalRewriteAllWithIndex!};
         execReplacer(evalRewriteAllWithIndex!(eval), patt, input)
 
-    /// Regex should provide Regex version of common String functions...
-
-    ///
-    /// Count the occurences of `patt` in string `s`.
-    ///
-    pub def countMatches(patt: Pattern, s: String): Int32 =
-        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
-            |> Result.getWithDefault(0)
-
-    def countMatcher(n: Int32): Matcher[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find!, point};
-        let* first = find!();
-        if (first) countMatcher(n+1) else point(n)
-
 
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
@@ -394,6 +396,9 @@ namespace Text/Regex {
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
+    ///
+    /// Find index of rightmost match.
+    ///
     pub def indexOfRight(patt: Pattern, s: String): Option[Int32] = indexOfRightHelper(patt, s) as & Pure
 
     def indexOfRightHelper(patt: Pattern, s: String): Option[Int32] & Impure =
@@ -412,6 +417,16 @@ namespace Text/Regex {
         let m1 = {
             let* bfound = find!();
             if (bfound) end() else throwError("none")
+        };
+        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+    pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] = rangeOfRightHelper(patt, s) as & Pure
+
+    def rangeOfRightHelper(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] & Impure =
+        use Text/Regex/Matcher.{flatMap, findLast!, range, throwError};
+        let m1 = {
+            let* bfound = findLast!();
+            if (bfound) range() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
@@ -462,6 +477,27 @@ namespace Text/Regex {
         match indexOfEndLeft(patt, s) {
             case None => (s, "")
             case Some(i) => (String.sliceLeft(i, s), String.sliceRight(i, s))
+        }
+
+
+    ///
+    /// Find the last instance of `substr` in string `s`, return a pair of the
+    /// initial string including `substr` and suffix from `substr`.
+    ///
+    pub def breakOnRight(patt: Pattern, s: String): (String, String) =
+        match rangeOfRight(patt, s) {
+            case None => (s, "")
+            case Some(rng) => (String.sliceLeft(rng.end, s), String.sliceRight(rng.end, s))
+        }
+
+    ///
+    /// Find the last instance of `substr` in string `s`, return a pair of the
+    /// initial string including `substr` and suffix from `substr`.
+    ///
+    pub def breakBeforeRight(patt: Pattern, s: String): (String, String) =
+        match rangeOfRight(patt, s) {
+            case None => (s, "")
+            case Some(rng) => (String.sliceLeft(rng.start, s), String.sliceRight(rng.start, s))
         }
 
 }
