@@ -159,6 +159,8 @@ namespace Text/Regex {
     ///
     /// Returns the first substring of `input` matched by the pattern `patt`.
     ///
+    /// TODO `contains` returns Bool in String - needs new name
+    ///
     pub def contains(patt: Pattern, input: String): Option[String] =
         extract(Text/Regex/Internal/Prim.find!, notModified, patt, input)
 
@@ -316,10 +318,14 @@ namespace Text/Regex {
         use Text/Regex/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 
+
+
+    // # String API functions using regexs
+
     ///
     /// Count the occurences of `patt` in string `s`.
     ///
-    pub def countMatches(patt: Pattern, s: String): Int32 =
+    pub def countSubmatches(patt: Pattern, s: String): Int32 =
         Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
             |> Result.getWithDefault(0)
 
@@ -328,8 +334,6 @@ namespace Text/Regex {
         let* first = find!();
         if (first) countMatcher(acc+1) else point(acc)
 
-
-    // # String API functions using regexs
 
     ///
     /// Splits the string `s` around matches of the pattern `p`.
@@ -386,49 +390,46 @@ namespace Text/Regex {
     ///
     /// If `patt` is the empty string return None.
     ///
-    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] = indexOfLeftHelper(patt, s) as & Pure
-
-    def indexOfLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find!, start, throwError};
-        let m1 = {
-            let* bfound = find!();
-            if (bfound) start() else throwError("none")
-        };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.find!(), Text/Regex/Matcher.start(), patt, s) as & Pure
 
     ///
     /// Find index of rightmost match.
     ///
-    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] = indexOfRightHelper(patt, s) as & Pure
+    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findLast!(), Text/Regex/Matcher.start(), patt, s) as & Pure
 
-    def indexOfRightHelper(patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, findLast!, start, throwError};
-        let m1 = {
-            let* bfound = findLast!();
-            if (bfound) start() else throwError("none")
-        };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+    pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.find!(), Text/Regex/Matcher.end(), patt, s) as & Pure
+
+    pub def indexOfEndRight(patt: Pattern, s: String): Option[Int32] =
+        indexOfHelper(Text/Regex/Matcher.findLast!(), Text/Regex/Matcher.end(), patt, s) as & Pure
 
 
-    pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] = indexOfEndLeftHelper(patt, s) as & Pure
-
-    def indexOfEndLeftHelper(patt: Pattern, s: String): Option[Int32] & Impure =
+    def indexOfHelper(finder: Matcher[Bool], extract: Matcher[Int32], patt: Pattern, s: String): Option[Int32] & Impure =
         use Text/Regex/Matcher.{flatMap, find!, end, throwError};
         let m1 = {
-            let* bfound = find!();
-            if (bfound) end() else throwError("none")
+            let* bfound = finder;
+            if (bfound) extract else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
-    pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] = rangeOfRightHelper(patt, s) as & Pure
+    pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
+        rangeOfHelper(Text/Regex/Matcher.find!(), patt, s) as & Pure
 
-    def rangeOfRightHelper(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] & Impure =
-        use Text/Regex/Matcher.{flatMap, findLast!, range, throwError};
+    pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
+        rangeOfHelper(Text/Regex/Matcher.findLast!(), patt, s) as & Pure
+
+    def rangeOfHelper(finder: Matcher[Bool], patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] & Impure =
+        use Text/Regex/Matcher.{flatMap, range, throwError};
         let m1 = {
-            let* bfound = findLast!();
+            let* bfound = finder;
             if (bfound) range() else throwError("none")
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+
+
+
 
 
     ///
@@ -499,5 +500,9 @@ namespace Text/Regex {
             case None => (s, "")
             case Some(rng) => (String.sliceLeft(rng.start, s), String.sliceRight(rng.start, s))
         }
+
+    /// stripPrefix
+
+    // stripSuffix
 
 }
