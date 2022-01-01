@@ -37,17 +37,17 @@ def test03(): Result[Bool, String] & Impure =
 /// Note - have to find first... This needs a big warning!
 def test03a(): Result[Int32, String] & Impure =
     use Result.{flatMap};
-    use Text/Regex/Matcher.{evaluate, find, runMatcher};
+    use Text/Regex/Matcher.{evaluate, find!, runMatcher};
     let* patt = Text/Regex/Pattern.compile("(\\p{Digit}+)");
     let eval1 = Text/Regex/MatchEvaluator.getInt32At(0);
-    runMatcher(Applicative.productRight(find(), evaluate(eval1)), patt, "1000")
+    runMatcher(Applicative.productRight(find!(), evaluate(eval1)), patt, "1000")
 
 def test04(): Result[Int32, String] & Impure =
     use Result.{flatMap};
-    use Text/Regex/Matcher.{evaluate, find, runMatcher};
+    use Text/Regex/Matcher.{evaluate, find!, runMatcher};
     let* patt = Text/Regex/Pattern.compile("Set\\p{Blank}*(?<set>\\p{Digit}+)");
     let eval1 = Text/Regex/MatchEvaluator.getInt32Named("set");
-    runMatcher(Applicative.productRight(find(), evaluate(eval1)), patt, "Set 1 Match 1")    
+    runMatcher(Applicative.productRight(find!(), evaluate(eval1)), patt, "Set 1 Match 1")    
 
 
 def test05(): Result[Unit, String] & Impure =

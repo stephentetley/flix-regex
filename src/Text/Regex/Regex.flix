@@ -22,32 +22,117 @@ namespace Text/Regex {
     use Text/Regex.MatchEvaluator.{MatchEvaluator};
     use Text/Regex/Internal.PrimMatcher;
 
+
+    // # Helpers
+
+    def testMatch(test: ##java.util.regex.Matcher -> Bool & ef,
+                    modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                    patt: Pattern,
+                    input: String): Bool =
+        match (testMatchHelper(test, modify!, patt, input) as & Pure) {
+            case Err(_) => false
+            case Ok(ans) => ans
+        }
+
+    def testMatchHelper(test: ##java.util.regex.Matcher -> Bool & ef,
+                        modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                        patt: Pattern,
+                        input: String): Result[Bool, String] & Impure =
+
+        use Result.flatMap;
+        let Pattern(patt1) = patt;
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
+        let* _ = modify!(m1);
+        Ok(test(m1))
+
+    def notModified(_: ##java.util.regex.Matcher): Result[Unit, String] & Impure = Ok(()) as & Impure
+
+    def setRegion!(bounds: {start:: Int32, end :: Int32}, x: ##java.util.regex.Matcher): Result[Unit, String] & Impure =
+        Text/Regex/Internal/Prim.setRegion!(x, bounds)
+
+
+    def extract(test: ##java.util.regex.Matcher -> Bool & ef,
+                modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                patt: Pattern,
+                input: String): Option[String] =
+        extractHelper(test, modify!, patt, input) as & Pure
+
+
+    def extractHelper(test: ##java.util.regex.Matcher -> Bool & ef,
+                        modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                        patt: Pattern,
+                        input: String): Option[String] & Impure =
+        use Option.flatMap;
+        try {
+            let Pattern(patt1) = patt;
+            let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
+            let* _ = Result.toOption(modify!(m1));
+            if (test(m1))
+                Result.toOption(Text/Regex/Internal/Prim.group(m1))
+            else
+                None
+        } catch {
+            case _: ##java.lang.Exception => None
+        }
+
+    // Design note - if a function uses a MatchEvaluator it should return `Result[a, String]`
+    // as MatchEvaluator has user supplied error messages.
+
+    def evaluate(test: ##java.util.regex.Matcher -> Bool & ef,
+                    modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                    eval: MatchEvaluator[a],
+                    patt: Pattern,
+                    input: String): Result[a, String] & Impure =
+        use Result.flatMap;
+        let Pattern(patt1) = patt;
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
+        let* _ = modify!(m1);
+        if (test(m1)) {
+            let MatchEvaluator(fn) = eval;
+            fn(m1)
+        } else
+            Err("evalWithTest - no match")
+
+    /// Return `Option[a]` with None indicating "no match" (no match being necessarily an error).
+    def evaluateOptional(test: ##java.util.regex.Matcher -> Bool & ef,
+                            modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
+                            eval: MatchEvaluator[a],
+                            patt: Pattern,
+                            input: String): Result[Option[a], String] & Impure =
+        use Result.flatMap;
+        let Pattern(patt1) = patt;
+        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
+        let* _ = modify!(m1);
+        if (test(m1)) {
+            let MatchEvaluator(fn) = eval;
+            fn(m1) |> Result.map(Some)
+        } else
+            Ok(None)
+
+
+
+
+    // # Predicates
+
     ///
     /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
     ///
-    /// Note - use `contains` to search for a substring.
-    ///
     pub def isMatch(patt: Pattern, input: String): Bool =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.matches(m1) as & Pure
+        testMatch(Text/Regex/Internal/Prim.matches, notModified, patt, input)
 
     ///
     /// Returns `true` if the string `input` is matched by the regular expression pattern `patt`
     /// at any position within the string.
     ///
     pub def isSubmatch(patt: Pattern, input: String): Bool =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.find!(m1) as & Pure
+        testMatch(Text/Regex/Internal/Prim.find!, notModified, patt, input)
+
 
     ///
     /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
     ///
     pub def startsWith(patt: Pattern, input: String): Bool =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.lookingAt(m1) as & Pure
+        testMatch(Text/Regex/Internal/Prim.lookingAt, notModified, patt, input)
 
     ///
     /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
@@ -60,75 +145,69 @@ namespace Text/Regex {
             case Err(_) => false
             case Ok(patt2) => isSubmatch(patt2, input)
         }
-/*
-    def boundedTest(test: ##java.util.regex.Matcher -> Bool & ef,
-                        bounds: {start :: Int32, end :: Int32},
-                        patt: Pattern,
-                        input: String): Bool =
-        ???
 
-    def boundedTestHelper(test: ##java.util.regex.Matcher -> Bool & ef,
-                            bounds: {start :: Int32, end :: Int32},
-                            patt: Pattern,
-                            input: String): Result[Bool, String] & Impure =
 
-        use Result.flatMap;
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let* _ = Text/Regex/Internal/Prim.setRegion!(m1, bounds);
-        if (test(m1))
-            Result.toOption(Text/Regex/Internal/Prim.group(m1))
-        else
-            None
+    // # Simple extractors
 
-*/
+    ///
+    /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
+    ///
+    pub def matches(patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.matches, notModified, patt, input)
 
-    /// TODO - should this be pure? (yes), return a Bool (?)...
-    /// Need to investigate why they were written this way, before changing them.
+
+    ///
+    /// Returns the first substring of `input` matched by the pattern `patt`.
+    ///
+    pub def contains(patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.find!, notModified, patt, input)
+
+    ///
+    /// Returns the start of `input` matched by the pattern `patt`.
+    ///
+    pub def prefix(patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.lookingAt, notModified, patt, input)
+
+
+
+
+
+    ///
+    /// Match input within region, `patt` must match the whole region...
+    ///
+    pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
+        testMatch(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, input)
+
+    ///
+    /// Match input within region
+    ///
+    pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
+        testMatch(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, input)
+
+
     /// Match input within region, match must start at start of region...
-    pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        boundedWithTest(Text/Regex/Internal/Prim.matches, bounds, patt, input)
-
-    /// Match input within region, match must start at start of region...
-    pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        boundedWithTest(Text/Regex/Internal/Prim.find!, bounds, patt, input)
+    pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
+        testMatch(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, input)
 
 
-    /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] & Impure =
-        boundedWithTest(Text/Regex/Internal/Prim.lookingAt, bounds, patt, input)
+    // # Bounded extractors
+
+    ///
+    ///
+    pub def boundedMatches(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, input)
+
+    pub def boundedContains(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, input)
+
+    pub def boundedPrefix(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
+        extract(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, input)
+
+
 
 
 
     // Using MatchEvaluator...
-
-
-    // Design note - if a function uses a MatchEvaluator it should return `Result[a, String]` rather than `Option[a]`
-    // as MatchEvaluator has user supplied error messages.
-
-    def evalWithTest(test: ##java.util.regex.Matcher -> Bool & ef,
-                        patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        if (test(m1)) {
-            let MatchEvaluator(fn) = eval;
-            fn(m1)
-        } else
-            Err("evalWithTest - no match")
-
-    /// Design note - if a function uses a MatchEvaluator it should return `Result[a, String]` rather than `Option[a]`
-    /// as MatchEvaluator has user supplied error messages.
-    /// However "no match" is not always a error, this version uses an inner option to signal "match" / "not matched".
-    def evalWithTestOptional(test: ##java.util.regex.Matcher -> Bool & ef,
-                            patt: Pattern, eval: MatchEvaluator[a],
-                            input: String): Result[Option[a], String] & Impure =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        if (test(m1)) {
-            let MatchEvaluator(fn) = eval;
-            fn(m1) |> Result.map(Some)
-        } else
-            Ok(None)
 
 
     /// Whole input matches...
@@ -136,14 +215,14 @@ namespace Text/Regex {
     /// so this function is impure.
     ///
     pub def evalMatches(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Prim.matches, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.matches, notModified, eval, patt, input)
 
     /// Whole input matches...
     /// The MatchEvaluator `eval` is potentially impure (e.g. it might create an array),
     /// so this function is impure.
     /// Returns `Ok(None)` on no match
     pub def evalMatchesOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evalWithTestOptional(Text/Regex/Internal/Prim.matches, patt, eval, input)
+        evaluateOptional(Text/Regex/Internal/Prim.matches, notModified, eval, patt, input)
 
 
     /// Input matches at least once (left to right)...
@@ -152,104 +231,60 @@ namespace Text/Regex {
     /// so this function is impure.
     ///
     pub def evalContains(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Prim.find!, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.find!, notModified, eval, patt, input)
 
     /// Returns `Ok(None)` on no match
     pub def evalContainsOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evalWithTestOptional(Text/Regex/Internal/Prim.find!, patt, eval, input)
+        evaluateOptional(Text/Regex/Internal/Prim.find!, notModified, eval, patt, input)
 
     /// Input matches at least once (left to right)...
     pub def evalStartsWith(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        evalWithTest(Text/Regex/Internal/Prim.lookingAt, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.lookingAt, notModified, eval, patt, input)
 
     /// Returns `Ok(None)` on no match
     pub def evalStartsWithOptional(patt: Pattern, eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        evalWithTestOptional(Text/Regex/Internal/Prim.lookingAt, patt, eval, input)
-
-    def boundedWithTest(test: ##java.util.regex.Matcher -> Bool & ef,
-                        bounds: {start :: Int32, end :: Int32},
-                        patt: Pattern,
-                        input: String): Option[String] & Impure =
-        use Option.flatMap;
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let* _ = Result.toOption(Text/Regex/Internal/Prim.setRegion!(m1, bounds));
-        if (test(m1))
-            Result.toOption(Text/Regex/Internal/Prim.group(m1))
-        else
-            None
+        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, notModified, eval, patt, input)
 
 
-
-    /// Whole input matches within region...
-    def evalBoundedWithTest(test: ##java.util.regex.Matcher -> Bool & ef,
-                            bounds: {start :: Int32, end :: Int32},
-                            patt: Pattern,
-                            eval: MatchEvaluator[a], input: String): Result[a, String] & Impure =
-        use Result.flatMap;
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let* _ = Text/Regex/Internal/Prim.setRegion!(m1, bounds);
-        if (test(m1)) {
-            let MatchEvaluator(fn) = eval;
-            fn(m1)
-        } else
-            Err("evalBoundedWithTest - no match")
-
-    /// Whole input matches within region...
-    /// Returns `Ok(None)` on no match
-    def evalBoundedWithTestOptional(test: ##java.util.regex.Matcher -> Bool & ef,
-                                    bounds: {start :: Int32, end :: Int32},
-                                    patt: Pattern,
-                                    eval: MatchEvaluator[a], input: String): Result[Option[a], String] & Impure =
-        use Result.flatMap;
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let* _ = Text/Regex/Internal/Prim.setRegion!(m1, bounds);
-        if (test(m1)) {
-            let MatchEvaluator(fn) = eval;
-            fn(m1) |> Result.map(Some)
-        } else
-            Ok(None)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedMatches(bounds: {start :: Int32, end :: Int32},
                                 patt: Pattern,
                                 eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Prim.matches, bounds, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.matches, setRegion!(bounds), eval, patt, input)
 
     pub def evalBoundedMatchesOptional(bounds: {start :: Int32, end :: Int32},
                                         patt: Pattern,
                                         eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
-        evalBoundedWithTestOptional(Text/Regex/Internal/Prim.matches, bounds, patt, eval, input)
+        evaluateOptional(Text/Regex/Internal/Prim.matches, setRegion!(bounds), eval, patt, input)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedContains(bounds: {start :: Int32, end :: Int32},
                                 patt: Pattern,
                                 eval: MatchEvaluator[a],
                                 input: String): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Prim.find!, bounds, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.find!, setRegion!(bounds), eval, patt, input)
 
     pub def evalBoundedContainsOptional(bounds: {start :: Int32, end :: Int32},
                                         patt: Pattern,
                                         eval: MatchEvaluator[a],
                                         input: String): Result[Option[a], String] & Impure =
-        evalBoundedWithTestOptional(Text/Regex/Internal/Prim.find!, bounds, patt, eval, input)
+        evaluateOptional(Text/Regex/Internal/Prim.find!, setRegion!(bounds), eval, patt, input)
 
     /// Match input within region, match must start at start of region...
     pub def evalBoundedStartsWith(bounds: {start :: Int32, end :: Int32},
                                     patt: Pattern,
                                     eval: MatchEvaluator[a],
                                     input: String): Result[a, String] & Impure =
-        evalBoundedWithTest(Text/Regex/Internal/Prim.lookingAt, bounds, patt, eval, input)
+        evaluate(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), eval, patt, input)
 
     pub def evalBoundedStartsWithOptional(bounds: {start :: Int32, end :: Int32},
                                             patt: Pattern,
                                             eval: MatchEvaluator[a],
                                             input: String): Result[Option[a], String] & Impure =
-        evalBoundedWithTestOptional(Text/Regex/Internal/Prim.lookingAt, bounds, patt, eval, input)
+        evaluateOptional(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), eval, patt, input)
 
 
     ///
