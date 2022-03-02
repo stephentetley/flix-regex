@@ -340,7 +340,7 @@ namespace Text/Regex {
     /// Splits the string `s` around matches of the pattern `p`.
     ///
     pub def split(patt: Pattern, input: String): Array[String] & Impure =
-        import java.util.regex.Pattern.split(##java.lang.CharSequence);
+        import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String] & Impure;
         let Pattern(p1) = patt;
         let cs1 = input as ##java.lang.CharSequence;
         split(p1, cs1)

@@ -30,9 +30,9 @@ namespace Text/Regex {
         /// Return the string representation of the Pattern `patt`.
         ///
         pub def toString(patt: Pattern): String =
-            import java.util.regex.Pattern.toString();
+            import java.util.regex.Pattern.toString(): String & Pure;
             let Pattern(p1) = patt;
-            toString(p1) as & Pure
+            toString(p1)
     }
 
     instance FromString[Pattern] {
@@ -40,9 +40,9 @@ namespace Text/Regex {
         /// Return the string representation of the Pattern `patt`.
         ///
         pub def fromString(regex: String): Option[Pattern] =
-            import static java.util.regex.Pattern.compile(String);
+            import static java.util.regex.Pattern.compile(String): ##java.util.regex.Pattern & Pure;
             try {
-                Some(Pattern(compile(regex))) as & Pure
+                Some(Pattern(compile(regex)))
             } catch {
                 case _: ##java.util.regex.PatternSyntaxException => None
             }
@@ -69,15 +69,15 @@ namespace Text/Regex/Pattern {
 
 
     def toInt(flag: Flag): Int32 =
-        import static get java.util.regex.Pattern.CANON_EQ as get_CANON_EQ;
-        import static get java.util.regex.Pattern.CASE_INSENSITIVE as get_CASE_INSENSITIVE;
-        import static get java.util.regex.Pattern.COMMENTS as get_COMMENTS;
-        import static get java.util.regex.Pattern.DOTALL as get_DOTALL;
-        import static get java.util.regex.Pattern.LITERAL as get_LITERAL;
-        import static get java.util.regex.Pattern.MULTILINE as get_MULTILINE;
-        import static get java.util.regex.Pattern.UNICODE_CASE as get_UNICODE_CASE;
-        import static get java.util.regex.Pattern.UNICODE_CHARACTER_CLASS as get_UNICODE_CHARACTER_CLASS;
-        import static get java.util.regex.Pattern.UNIX_LINES as get_UNIX_LINES;
+        import static get java.util.regex.Pattern.CANON_EQ: Int32 & Pure as get_CANON_EQ;
+        import static get java.util.regex.Pattern.CASE_INSENSITIVE: Int32 & Pure as get_CASE_INSENSITIVE;
+        import static get java.util.regex.Pattern.COMMENTS: Int32 & Pure as get_COMMENTS;
+        import static get java.util.regex.Pattern.DOTALL: Int32 & Pure as get_DOTALL;
+        import static get java.util.regex.Pattern.LITERAL: Int32 & Pure as get_LITERAL;
+        import static get java.util.regex.Pattern.MULTILINE: Int32 & Pure as get_MULTILINE;
+        import static get java.util.regex.Pattern.UNICODE_CASE: Int32 & Pure as get_UNICODE_CASE;
+        import static get java.util.regex.Pattern.UNICODE_CHARACTER_CLASS: Int32 & Pure as get_UNICODE_CHARACTER_CLASS;
+        import static get java.util.regex.Pattern.UNIX_LINES: Int32 & Pure as get_UNIX_LINES;
         match flag {
             case CanonEq                => get_CANON_EQ()
             case CaseInsenstive         => get_CASE_INSENSITIVE()
@@ -88,7 +88,7 @@ namespace Text/Regex/Pattern {
             case UnicodeCase            => get_UNICODE_CASE()
             case UnicodeCharacterClass  => get_UNICODE_CHARACTER_CLASS()
             case UnixLines              => get_UNIX_LINES()
-        } as & Pure
+        }
 
     def sumFlags(flags: List[Flag]): Int32 =
         List.foldLeft((ac,e) -> ac + toInt(e), 0, flags)
@@ -107,9 +107,9 @@ namespace Text/Regex/Pattern {
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
     pub def compile(regex: String): Result[Pattern, String] =
-        import static java.util.regex.Pattern.compile(String);
+        import static java.util.regex.Pattern.compile(String): ##java.util.regex.Pattern & Pure;
         try {
-            Ok(Pattern(compile(regex))) as & Pure
+            Ok(Pattern(compile(regex)))
         } catch {
             case _: ##java.util.regex.PatternSyntaxException => Err("Text/Regex/Pattern.compile failed - '${regex}'")
         }
@@ -122,9 +122,9 @@ namespace Text/Regex/Pattern {
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
     pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, String] =
-        import static java.util.regex.Pattern.compile(String, Int32);
+        import static java.util.regex.Pattern.compile(String, Int32): ##java.util.regex.Pattern & Pure;
         try {
-            Ok(Pattern(compile(regex, sumFlags(flags)))) as & Pure
+            Ok(Pattern(compile(regex, sumFlags(flags))))
         } catch {
             case _: ##java.lang.Exception => Err("Text/Regex/Pattern.compileWithFlags failed - '${regex}', ${flags}")
         }
@@ -137,9 +137,9 @@ namespace Text/Regex/Pattern {
     /// and you need to avoid wrapping it in an `Ok`.
     ///
     pub def irrefutablePattern(regex: String): Pattern =
-        import static java.util.regex.Pattern.compile(String);
+        import static java.util.regex.Pattern.compile(String): ##java.util.regex.Pattern & Pure;
         try {
-            Pattern(compile(regex)) as & Pure
+            Pattern(compile(regex))
         } catch {
             case _: ##java.util.regex.PatternSyntaxException => unmatchable()
         }
@@ -148,36 +148,33 @@ namespace Text/Regex/Pattern {
     /// Return the unmatchable pattern - a pattern that will not match any input.
     ///
     pub def unmatchable(): Pattern =
-        import static java.util.regex.Pattern.compile(String);
+        import static java.util.regex.Pattern.compile(String): ##java.util.regex.Pattern & Pure;
         try {
-            Pattern(compile("^\\b$")) as & Pure
+            Pattern(compile("^\\b$"))
         } catch {
             case _: ##java.util.regex.PatternSyntaxException => unreachable!()
         }
 
 
     pub def quote(s: String): String =
-        import static java.util.regex.Pattern.quote(String);
-        quote(s) as & Pure
-
-
-
+        import static java.util.regex.Pattern.quote(String): String & Pure;
+        quote(s)
 
     ///
     /// Return the regular expression used to build this pattern.
     ///
     pub def getPattern(patt: Pattern): String =
-        import java.util.regex.Pattern.pattern();
+        import java.util.regex.Pattern.pattern(): String & Pure;
         let Pattern(p1) = patt;
-        pattern(p1) as & Pure
+        pattern(p1)
 
     ///
     /// Return the flags used to build this pattern.
     ///
     pub def getFlags(patt: Pattern): List[Flag] =
-        import java.util.regex.Pattern.flags();
+        import java.util.regex.Pattern.flags(): Int32 & Pure;
         let Pattern(p1) = patt;
-        let i = flags(p1) as & Pure;
+        let i = flags(p1);
         listFlags(i)
 
     ///

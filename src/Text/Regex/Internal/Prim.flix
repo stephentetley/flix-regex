@@ -22,7 +22,7 @@ namespace Text/Regex/Internal/Prim {
     /// Create a Matcher for Pattern `patt` on the source String `input`.
     ///
     pub def newMatcher(patt: ##java.util.regex.Pattern, input: String): ##java.util.regex.Matcher & Impure =
-        import java.util.regex.Pattern.matcher(##java.lang.CharSequence);
+        import java.util.regex.Pattern.matcher(##java.lang.CharSequence): ##java.util.regex.Matcher & Impure;
         let cs1 = input as ##java.lang.CharSequence;
         matcher(patt, cs1)
 
@@ -30,14 +30,14 @@ namespace Text/Regex/Internal/Prim {
     /// Tests whether the matcher matches all of the input region.
     ///
     pub def matches(x: ##java.util.regex.Matcher): Bool & Impure =
-        import java.util.regex.Matcher.matches();
+        import java.util.regex.Matcher.matches(): Bool & Impure;
         matches(x)
 
     ///
     /// Tests whether the matcher matches the start of the input region.
     ///
     pub def lookingAt(x: ##java.util.regex.Matcher): Bool & Impure =
-        import java.util.regex.Matcher.lookingAt();
+        import java.util.regex.Matcher.lookingAt(): Bool & Impure;
         lookingAt(x)
 
     ///
@@ -47,7 +47,7 @@ namespace Text/Regex/Internal/Prim {
     /// The internal state of the matcher is updated.
     ///
     pub def find!(x: ##java.util.regex.Matcher): Bool & Impure =
-        import java.util.regex.Matcher.find();
+        import java.util.regex.Matcher.find(): Bool & Impure;
         find(x)
 
     ///
@@ -58,7 +58,7 @@ namespace Text/Regex/Internal/Prim {
     /// The internal state of the matcher is updated.
     ///
     pub def findFrom!(x: ##java.util.regex.Matcher, start: Int32): Result[Bool, String] & Impure =
-        import java.util.regex.Matcher.find(Int32);
+        import java.util.regex.Matcher.find(Int32): Bool & Impure;
         try {
             Ok(find(x, start))
         } catch {
@@ -69,14 +69,14 @@ namespace Text/Regex/Internal/Prim {
     /// Replace all the matches found by this matcher with the string `rep`.
     ///
     pub def replaceAll(x: ##java.util.regex.Matcher, rep: String): String & Impure =
-        import java.util.regex.Matcher.replaceAll(String);
+        import java.util.regex.Matcher.replaceAll(String): String & Impure;
         replaceAll(x, rep)
 
     ///
     /// Replace the first match found by this matcher with the string `rep`.
     ///
     pub def replaceFirst(x: ##java.util.regex.Matcher, rep: String): String & Impure =
-        import java.util.regex.Matcher.replaceFirst(String);
+        import java.util.regex.Matcher.replaceFirst(String): String & Impure;
         replaceFirst(x, rep)
 
     ///
@@ -86,7 +86,7 @@ namespace Text/Regex/Internal/Prim {
     /// This is idiomatically functional, so we imperatively reset `x` and return Unit.
     ///
     pub def reset!(x: ##java.util.regex.Matcher): Unit & Impure =
-        import java.util.regex.Matcher.reset();
+        import java.util.regex.Matcher.reset(): Unit & Impure;
         reset(x);
         ()
 
@@ -94,7 +94,7 @@ namespace Text/Regex/Internal/Prim {
     /// Reset the input of this matcher.
     ///
     pub def resetInput!(x: ##java.util.regex.Matcher, input: String): Unit & Impure =
-        import java.util.regex.Matcher.reset(##java.lang.CharSequence);
+        import java.util.regex.Matcher.reset(##java.lang.CharSequence): Unit & Impure;
         let cs = input as ##java.lang.CharSequence;
         reset(x, cs);
         ()
@@ -103,9 +103,9 @@ namespace Text/Regex/Internal/Prim {
     /// Change the pattern used by this matcher.
     ///
     pub def usePattern!(x: ##java.util.regex.Matcher, patt: ##java.util.regex.Pattern): Result[Unit, String] & Impure =
-        import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern);
+        import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher & Impure;
         try {
-            usePattern(x, patt);
+            let _ = usePattern(x, patt);
             Ok()
         } catch {
             case _: ##java.lang.Exception => Err("usePattern!")
@@ -115,9 +115,9 @@ namespace Text/Regex/Internal/Prim {
     /// Set the bounds of the matcher's region.
     ///
     pub def setRegion!(x: ##java.util.regex.Matcher, bounds: {start :: Int32, end :: Int32}): Result[Unit, String] & Impure =
-        import java.util.regex.Matcher.region(Int32, Int32);
+        import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher & Impure;
         try {
-            region(x, bounds.start, bounds.end);
+            let _ = region(x, bounds.start, bounds.end);
             Ok()
         } catch {
             case _: ##java.lang.Exception => Err("region")
@@ -127,7 +127,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the start position of the string matched by the preceeding `find`
     ///
     pub def start(x: ##java.util.regex.Matcher): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.start();
+        import java.util.regex.Matcher.start(): Int32 & Impure;
         try {
             Ok(start(x))
         } catch {
@@ -138,7 +138,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the end position of the string matched by the preceeding `find`
     ///
     pub def end(x: ##java.util.regex.Matcher): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.end();
+        import java.util.regex.Matcher.end(): Int32 & Impure;
         try {
             Ok(end(x))
         } catch {
@@ -149,7 +149,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the string matched by the preceeding `find`
     ///
     pub def group(x: ##java.util.regex.Matcher): Result[String, String] & Impure =
-        import java.util.regex.Matcher.group();
+        import java.util.regex.Matcher.group(): String & Impure;
         try {
             Ok(group(x))
         } catch {
@@ -164,7 +164,7 @@ namespace Text/Regex/Internal/Prim {
     /// or none.
     ///
     pub def groupCount(x: ##java.util.regex.Matcher): Int32 & Impure =
-        import java.util.regex.Matcher.groupCount();
+        import java.util.regex.Matcher.groupCount(): Int32 & Impure;
         groupCount(x)
 
     ///
@@ -173,7 +173,7 @@ namespace Text/Regex/Internal/Prim {
     /// This follows the Java convention where index 0 matches everything.
     ///
     pub def groupWithIndex(x: ##java.util.regex.Matcher, ix: Int32): Result[String, String] & Impure =
-        import java.util.regex.Matcher.group(Int32);
+        import java.util.regex.Matcher.group(Int32): String & Impure;
         try {
             Ok(group(x, ix))
         } catch {
@@ -184,7 +184,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the part of string matched by the preceeding `find` for the given group `label`.
     ///
     pub def groupWithLabel(x: ##java.util.regex.Matcher, label: String): Result[String, String] & Impure =
-        import java.util.regex.Matcher.group(String);
+        import java.util.regex.Matcher.group(String): String & Impure;
         try {
             Ok(group(x, label))
         } catch {
@@ -197,7 +197,7 @@ namespace Text/Regex/Internal/Prim {
     /// This follows the Java convention where index 0 matches everything.
     ///
     pub def startWithIndex(x: ##java.util.regex.Matcher, ix: Int32): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.start(Int32);
+        import java.util.regex.Matcher.start(Int32): Int32 & Impure;
         try {
             Ok(start(x, ix))
         } catch {
@@ -208,7 +208,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the start index of string matched by the preceeding `find` for the given group `label`.
     ///
     pub def startWithLabel(x: ##java.util.regex.Matcher, label: String): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.start(String);
+        import java.util.regex.Matcher.start(String): Int32 & Impure;
         try {
             Ok(start(x, label))
         } catch {
@@ -221,7 +221,7 @@ namespace Text/Regex/Internal/Prim {
     /// This follows the Java convention where index 0 matches everything.
     ///
     pub def endWithIndex(x: ##java.util.regex.Matcher, ix: Int32): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.end(Int32);
+        import java.util.regex.Matcher.end(Int32): Int32 & Impure;
         try {
             Ok(end(x, ix))
         } catch {
@@ -232,7 +232,7 @@ namespace Text/Regex/Internal/Prim {
     /// Return the end position of string matched by the preceeding `find` for the given group `label`.
     ///
     pub def endWithLabel(x: ##java.util.regex.Matcher, label: String): Result[Int32, String] & Impure =
-        import java.util.regex.Matcher.end(String);
+        import java.util.regex.Matcher.end(String): Int32 & Impure;
         try {
             Ok(end(x, label))
         } catch {
@@ -243,7 +243,7 @@ namespace Text/Regex/Internal/Prim {
     /// Append the replacement `rep` to the string builder `sb` for the current match step.
     ///
     pub def appendReplacement!(x: ##java.util.regex.Matcher, sb: StringBuilder, rep: String): Result[Unit, String] & Impure =
-        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String);
+        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher & Impure;
         try {
             let StringBuilder(sb1) = sb;
             let _ = appendReplacement(x, sb1, rep);
@@ -256,9 +256,9 @@ namespace Text/Regex/Internal/Prim {
     /// Append the remaining tail of the input to the string builder `sb` for the final match step.
     ///
     pub def appendTail!(x: ##java.util.regex.Matcher, sb: StringBuilder): Unit & Impure =
-        import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder);
+        import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder & Impure;
         let StringBuilder(sb1) = sb;
-        appendTail(x, sb1);
+        let _ = appendTail(x, sb1);
         ()
 
 }
