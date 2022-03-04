@@ -1,27 +1,20 @@
 
 
-def main(_args: Array[String]): Int32 & Impure = 
-    Console.printLine("Running...");
-    runTest("test01", _ -> test01());
-    runTest("test02", _ -> test02());
-    runTest("test03", _ -> test03());
-    runTest("test03a", _ -> test03a());
-    runTest("test04", _ -> test04());
-    runTest("test05", _ -> test05());
-    runTest("test06", _ -> test06());
-    0
+def runTest(f: Unit -> Result[Bool, String] & ef): Bool & ef = 
+    f() |> Result.getWithDefault(false)
 
 
-def runTest(msg: String, f: Unit -> Result[a, String] & Impure): Unit & Impure with ToString[a]= 
-    println(msg);
-    f() |> println
-
-def test01(): Result[Unit, String] & Impure = 
+@test
+def test01(): Bool = 
     use Result.{flatMap};
-    let* patt = Text/Regex/Pattern.compile("[Oo]");
-    Text/Regex.replaceFirstMatch(from = patt, to = "0", "Hello World") |> println;
-    Ok()
+    let step = () -> {
+        let* patt = Text/Regex/Pattern.compile("[Oo]");
+        Ok(Text/Regex.replaceFirstMatch(from = patt, to = "0", "Hello World") =="Hell0 World")
+    };
+    runTest(step)
+    
 
+/*
 def test02(): Result[Int32, String] & Impure =
     use Result.{flatMap};
     let* patt = Text/Regex/Pattern.compile("(\\p{Digit}+)");
@@ -67,3 +60,4 @@ def test06(): Result[Unit, String] & Impure =
     Text/Regex.endsWith(patt, String.unlines("some text" :: "111 more text" :: Nil)) |> println;
     Text/Regex.endsWith(patt, String.unlines("some text" :: "more text 111" :: Nil)) |> println;
     Ok()
+*/

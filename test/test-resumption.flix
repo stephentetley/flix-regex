@@ -1,5 +1,11 @@
 
 
+namespace TestResumption {
+
+    @test
+    def resumption01(): Bool = "TODO" == "TODO"
+
+/*
 def main(_args: Array[String]): Int32 & Impure = 
     Console.printLine("Running...");
     runTest("test01", _ -> test01());
@@ -40,3 +46,5 @@ def test03(): Result[List[Int32], String] & Impure =
     let getInt = find() *> evaluate(eval1);
     let extractor = count(3, getInt);
     runResMatcher(extractor, patt, "Game 4, Set 2, Match 1")
+*/
+}
