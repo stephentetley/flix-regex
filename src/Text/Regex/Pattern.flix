@@ -96,7 +96,7 @@ namespace Text/Regex/Pattern {
     def listFlags(x: Int32): List[Flag] =
         let check = y -> {
             let y1 = toInt(y);
-            x &&& y1 == y1
+            (x &&& y1) == y1
         };
         List.filter(check, CanonEq :: CaseInsenstive :: Comments :: Dotall :: Literal ::
                             Multiline :: UnicodeCase :: UnicodeCharacterClass :: UnixLines :: Nil)
