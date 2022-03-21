@@ -23,8 +23,8 @@ namespace Text/RegexEval/Regex {
     use Text/Regex.Replacer;
     use Text/Regex.Replacer.{Replacer};
 
-    use Text/Regex/Eval.MatchEvaluator;
-    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
+    use Text/RegexEval.MatchEvaluator;
+    use Text/RegexEval.MatchEvaluator.{MatchEvaluator};
 
     // # Helpers
 
@@ -179,14 +179,14 @@ namespace Text/RegexEval/Regex {
     /// Stream...
     ///
     pub def contents(patt: Pattern, input: String): Result[List[String], String] & Impure =
-        use Text/Regex/Eval/MatchEvaluator.{content};
+        use Text/RegexEval/MatchEvaluator.{content};
         results(patt, content(), input)
 
     ///
     /// Stream...
     ///
     pub def ranges(patt: Pattern, input: String): Result[List[{start :: Int32, end :: Int32}], String] & Impure =
-        use Text/Regex/Eval/MatchEvaluator.{getRange};
+        use Text/RegexEval/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 
 
@@ -197,7 +197,7 @@ namespace Text/RegexEval/Regex {
     ///
     pub def replace(from: {from :: Pattern}, to: {to :: MatchEvaluator[String]}, input: String): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer};
-        use Text/Regex/Eval/Replacer.{rewriteAll!};
+        use Text/RegexEval/Replacer.{rewriteAll!};
         execReplacer(rewriteAll!(to.to), from.from, input)
 
     /// TODO...
@@ -214,7 +214,7 @@ namespace Text/RegexEval/Regex {
     ///
     pub def rewriteWithIndex(patt: Pattern, eval: Int32 -> MatchEvaluator[String], input: String): Result[String, String] & Impure =
         use Text/Regex/Replacer.{execReplacer};
-        use Text/Regex/Eval/Replacer.{rewriteAllWithIndex!};
+        use Text/RegexEval/Replacer.{rewriteAllWithIndex!};
         execReplacer(rewriteAllWithIndex!(eval), patt, input)
 
 

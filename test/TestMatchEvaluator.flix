@@ -17,7 +17,7 @@
 
 namespace TestMatchEvaluator {
 
-    use Text/Regex/Eval.MatchEvaluator;
+    use Text/RegexEval.MatchEvaluator;
 
     /////////////////////////////////////////////////////////////////////////////
     // point                                                                   //
@@ -25,12 +25,12 @@ namespace TestMatchEvaluator {
 
     @test
     def point01(): MatchEvaluator[Bool] =
-        use Text/Regex/Eval/MatchEvaluator.{point};
+        use Text/RegexEval/MatchEvaluator.{point};
         point(true)
 
     @test
     def point02(): MatchEvaluator[Array[String]] & Impure =
-        use Text/Regex/Eval/MatchEvaluator.{point};
+        use Text/RegexEval/MatchEvaluator.{point};
         point(["aaa", "bbb"])
 
 }

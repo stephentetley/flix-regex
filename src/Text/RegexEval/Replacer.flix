@@ -16,7 +16,7 @@
 
 /// Augments the Regex.Replacer API with versions using MatchEvaluator
 
-namespace Text/Regex/Eval/Replacer {
+namespace Text/RegexEval/Replacer {
 
     use Text/Regex/Internal.PrimMatcher;
     use Text/Regex.Pattern;
@@ -25,8 +25,8 @@ namespace Text/Regex/Eval/Replacer {
     use Text/Regex.Replacer;
     use Text/Regex.Replacer.{Replacer};
 
-    use Text/Regex/Eval.MatchEvaluator;
-    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
+    use Text/RegexEval.MatchEvaluator;
+    use Text/RegexEval.MatchEvaluator.{MatchEvaluator};
 
 
     /// Replacer
