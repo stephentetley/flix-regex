@@ -49,8 +49,9 @@ namespace Text/Regex/Matcher {
 
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
-    use Text/Regex.{MatchEvaluator};
-    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+
+    use Text/Regex/Eval.MatchEvaluator;
+    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
 
     pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, String] & Impure =
         use Result.flatMap;
@@ -165,7 +166,7 @@ namespace Text/Regex/Matcher {
 
 
     pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
-        Matcher(r -> Text/Regex/MatchEvaluator.runMatchEvaluator(eval, r))
+        Matcher(r -> Text/Regex/Eval/MatchEvaluator.runMatchEvaluator(eval, r))
 
     pub def getMatch(): Matcher[String] =
         let* ans = find!();

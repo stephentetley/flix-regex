@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Stephen Tetley
+ * Copyright 2022 Stephen Tetley
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-namespace TestRegex {
+namespace TestEvalRegex {
 
-
+/*
     /////////////////////////////////////////////////////////////////////////////
     // isMatch                                                                 //
     /////////////////////////////////////////////////////////////////////////////
@@ -139,97 +139,97 @@ namespace TestRegex {
         };
         step() == Ok(true)
 
-    /// /////////////////////////////////////////////////////////////////////////////
-    /// // evalMatches                                                             //
-    /// /////////////////////////////////////////////////////////////////////////////
-
-    /// @test
-    /// def evalMatches01(): Bool & Impure =
-    ///     use Result.flatMap;
-    ///     use Text/Regex/Eval.{evalMatches};
-    ///     let eval = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
-    ///     let step = () -> {
-    ///         let* p1 = Text/Regex/Pattern.compile("(?<num>\\d+)");
-    ///         evalMatches(p1, eval, "123")
-    ///     };
-    ///     step() == Ok("123")
-
-    /// /////////////////////////////////////////////////////////////////////////////
-    /// // evalContains                                                            //
-    /// /////////////////////////////////////////////////////////////////////////////
-
-    /// @test
-    /// def evalContains01(): Bool & Impure =
-    ///     use Result.flatMap;
-    ///     use Text/Regex.{evalContains};
-    ///     let step = () -> {
-    ///         let* p1     = Text/Regex/Pattern.compile("(?<num>\\d+)");
-    ///         let eval    = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
-    ///         evalContains(p1, eval, "aa 123 bb")
-    ///     };
-    ///     step() == Ok("123")
-
-    /// /////////////////////////////////////////////////////////////////////////////
-    /// // evalStartsWith                                                          //
-    /// /////////////////////////////////////////////////////////////////////////////
-
-    /// @test
-    /// def evalStartsWith01(): Bool & Impure =
-    ///     use Result.flatMap;
-    ///     use Text/Regex.{evalStartsWith};
-    ///     let step = () -> {
-    ///         let* p1     = Text/Regex/Pattern.compile("(?<num>\\d+)");
-    ///         let eval    = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
-    ///         evalStartsWith(p1, eval, "123 bb")
-    ///     };
-    ///     step() == Ok("123")
-
-    /// /////////////////////////////////////////////////////////////////////////////
-    /// // results                                                                 //
-    /// /////////////////////////////////////////////////////////////////////////////
-
-    /// @test
-    /// def results01(): Bool & Impure =
-    ///     use Result.flatMap;
-    ///     use Text/Regex.{results};
-    ///     use Text/Regex/Eval/MatchEvaluator.{content};
-    ///     let step = () -> {
-    ///         let* p1 = Text/Regex/Pattern.compile("\\p{Alpha}+");
-    ///         let* xs = results(p1, content(), "aa bb cc");
-    ///         Ok(xs)
-    ///     };
-    ///     step() == Ok("aa" :: "bb" :: "cc" :: Nil)
-
     /////////////////////////////////////////////////////////////////////////////
-    // contents                                                                //
+    // evalMatches                                                             //
     /////////////////////////////////////////////////////////////////////////////
 
     @test
-    def contents01(): Bool & Impure =
+    def evalMatches01(): Bool & Impure =
         use Result.flatMap;
-        use Text/Regex.{contents};
+        use Text/Regex.{evalMatches};
+        let eval = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
+        let step = () -> {
+            let* p1 = Text/Regex/Pattern.compile("(?<num>\\d+)");
+            evalMatches(p1, eval, "123")
+        };
+        step() == Ok("123")
+
+    /////////////////////////////////////////////////////////////////////////////
+    // evalContains                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def evalContains01(): Bool & Impure =
+        use Result.flatMap;
+        use Text/Regex.{evalContains};
+        let step = () -> {
+            let* p1     = Text/Regex/Pattern.compile("(?<num>\\d+)");
+            let eval    = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
+            evalContains(p1, eval, "aa 123 bb")
+        };
+        step() == Ok("123")
+
+    /////////////////////////////////////////////////////////////////////////////
+    // evalStartsWith                                                          //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def evalStartsWith01(): Bool & Impure =
+        use Result.flatMap;
+        use Text/Regex.{evalStartsWith};
+        let step = () -> {
+            let* p1     = Text/Regex/Pattern.compile("(?<num>\\d+)");
+            let eval    = Text/Regex/Eval/MatchEvaluator.getCaptureNamed("num");
+            evalStartsWith(p1, eval, "123 bb")
+        };
+        step() == Ok("123")
+
+    /////////////////////////////////////////////////////////////////////////////
+    // results                                                                 //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def results01(): Bool & Impure =
+        use Result.flatMap;
+        use Text/Regex.{results};
+        use Text/Regex/Eval/MatchEvaluator.{content};
         let step = () -> {
             let* p1 = Text/Regex/Pattern.compile("\\p{Alpha}+");
-            let* xs = contents(p1, "aa bb cc");
+            let* xs = results(p1, content(), "aa bb cc");
             Ok(xs)
         };
         step() == Ok("aa" :: "bb" :: "cc" :: Nil)
 
     /////////////////////////////////////////////////////////////////////////////
-    // ranges                                                                  //
+    // contentResults                                                          //
     /////////////////////////////////////////////////////////////////////////////
 
     @test
-    def ranges01(): Bool & Impure =
+    def contentResults01(): Bool & Impure =
         use Result.flatMap;
-        use Text/Regex.{ranges};
+        use Text/Regex.{contentResults};
+        let step = () -> {
+            let* p1 = Text/Regex/Pattern.compile("\\p{Alpha}+");
+            let* xs = contentResults(p1, "aa bb cc");
+            Ok(xs)
+        };
+        step() == Ok("aa" :: "bb" :: "cc" :: Nil)
+
+    /////////////////////////////////////////////////////////////////////////////
+    // rangeResults                                                            //
+    /////////////////////////////////////////////////////////////////////////////
+
+    @test
+    def rangeResults01(): Bool & Impure =
+        use Result.flatMap;
+        use Text/Regex.{rangeResults};
         let toTuple = rng -> (rng.start, rng.end);
         let step = () -> {
             let* p1 = Text/Regex/Pattern.compile("\\p{Alpha}+");
-            let* xs = ranges(p1, "aa bb cc");
+            let* xs = rangeResults(p1, "aa bb cc");
             Ok(List.map(toTuple, xs))
         };
         
         step() == Ok((0,2) :: (3,5) :: (6,8) :: Nil)
-
+*/
 }

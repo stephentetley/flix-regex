@@ -46,8 +46,9 @@ namespace Text/Regex/Replacer {
 
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
-    use Text/Regex.{MatchEvaluator};
-    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+    
+    use Text/Regex/Eval.MatchEvaluator;
+    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
 
     pub def runReplacer(rep: Replacer[a], patt: Pattern, input: String): Result[(a, String), String] & Impure =
         use Result.flatMap;

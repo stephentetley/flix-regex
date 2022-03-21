@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-namespace Text/Regex {
+namespace Text/RegexEval/Regex {
 
-    use Text/Regex.Pattern;
-    use Text/Regex.Pattern.Pattern;
-    use Text/Regex.MatchEvaluator;
-    use Text/Regex.MatchEvaluator.{MatchEvaluator};
     use Text/Regex/Internal.PrimMatcher;
+    use Text/Regex.Pattern;
+    use Text/Regex.Pattern.{Pattern};
+    use Text/Regex.Matcher;
 
+    use Text/Regex/Eval.MatchEvaluator;
+    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
 
     // # Helpers
 
@@ -108,43 +109,6 @@ namespace Text/Regex {
             fn(m1) |> Result.map(Some)
         } else
             Ok(None)
-
-
-
-
-    // # Predicates
-
-    ///
-    /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
-    ///
-    pub def isMatch(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.matches, notModified, patt, input)
-
-    ///
-    /// Returns `true` if the string `input` is matched by the regular expression pattern `patt`
-    /// at any position within the string.
-    ///
-    pub def isSubmatch(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.find!, notModified, patt, input)
-
-
-    ///
-    /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
-    ///
-    pub def startsWith(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.lookingAt, notModified, patt, input)
-
-    ///
-    /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
-    ///
-    /// This may be slower than `startsWith` because there is no primitive Java function
-    /// to call, instead the matches of `patt` are iterated until the last one is found.
-    ///
-    pub def endsWith(patt: Pattern, input: String): Bool =
-        match rangeOfRight(patt, input) {
-            case None      => false
-            case Some(rng) => String.length(input) - 1 == rng.end
-        }
 
 
 
@@ -309,14 +273,14 @@ namespace Text/Regex {
     /// Stream...
     ///
     pub def contentResults(patt: Pattern, input: String): Result[List[String], String] & Impure =
-        use Text/Regex/MatchEvaluator.{content};
+        use Text/Regex/Eval/MatchEvaluator.{content};
         results(patt, content(), input)
 
     ///
     /// Stream...
     ///
     pub def rangeResults(patt: Pattern, input: String): Result[List[{start :: Int32, end :: Int32}], String] & Impure =
-        use Text/Regex/MatchEvaluator.{getRange};
+        use Text/Regex/Eval/MatchEvaluator.{getRange};
         results(patt, getRange(), input)
 
 
