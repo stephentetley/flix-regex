@@ -256,4 +256,21 @@ namespace Text/Regex/MatchEvaluator {
         let* str = getCaptureNamed(label);
         liftOption(fromString(str): Option[BigInt], "getBigIntNamed('${label}')")
 
+    pub def getFloat32At(ix: Int32): MatchEvaluator[Float32] =
+        let* str = getCaptureAt(ix);
+        liftOption(fromString(str): Option[Float32], "getFloat32At(${ix})")
+
+    pub def getFloat32Named(label: String): MatchEvaluator[Float32] =
+        let* str = getCaptureNamed(label);
+        liftOption(fromString(str): Option[Float32], "getFloat32Named('${label}')")
+
+    pub def getFloat64At(ix: Int32): MatchEvaluator[Float64] =
+        let* str = getCaptureAt(ix);
+        liftOption(fromString(str): Option[Float64], "getFloat64At(${ix})")
+
+    pub def getFloat64Named(label: String): MatchEvaluator[Float64] =
+        let* str = getCaptureNamed(label);
+        liftOption(fromString(str): Option[Float64], "getFloat64Named('${label}')")
+
+
 }
