@@ -16,7 +16,7 @@
 
 
 
-namespace Text/Regex {
+namespace Text/Regex/Eval {
 
     ///
     /// Matcher is a monad (handle, error).
@@ -25,30 +25,32 @@ namespace Text/Regex {
 
     instance Functor[MatchEvaluator] {
         pub def map(f: a -> b & ef, o: MatchEvaluator[a]): MatchEvaluator[b] & ef =
-            Text/Regex/MatchEvaluator.map(f, o)
+            Text/Regex/Eval/MatchEvaluator.map(f, o)
     }
 
     instance Applicative[MatchEvaluator] {
-        pub def point(x: a): MatchEvaluator[a] = Text/Regex/MatchEvaluator.point(x)
+        pub def point(x: a): MatchEvaluator[a] = 
+            Text/Regex/Eval/MatchEvaluator.point(x)
 
         pub def ap(f: MatchEvaluator[a -> b & ef], x: MatchEvaluator[a]): MatchEvaluator[b] & ef =
-            Text/Regex/MatchEvaluator.ap(f, x)
+            Text/Regex/Eval/MatchEvaluator.ap(f, x)
     }
 
     instance Monad[MatchEvaluator] {
         pub def flatMap(f: a -> MatchEvaluator[b] & ef, o: MatchEvaluator[a]): MatchEvaluator[b] & ef =
-            Text/Regex/MatchEvaluator.flatMap(f, o)
+            Text/Regex/Eval/MatchEvaluator.flatMap(f, o)
     }
 
 }
 
-namespace Text/Regex/MatchEvaluator {
+namespace Text/Regex/Eval/MatchEvaluator {
 
     use Applicative.{liftA2};
     use FromString.fromString;
 
-    use Text/Regex.MatchEvaluator;
-    use Text/Regex.MatchEvaluator.{MatchEvaluator};
+    use Text/Regex/Eval.MatchEvaluator;
+    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
+
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 

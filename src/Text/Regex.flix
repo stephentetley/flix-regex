@@ -20,9 +20,6 @@ namespace Text/Regex {
     use Text/Regex.Pattern.Pattern;
     use Text/Regex/Internal.PrimMatcher;
 
-    use Text/Regex/Eval.MatchEvaluator;
-    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
-
     // # Helpers
 
     def testMatch(test: ##java.util.regex.Matcher -> Bool & ef,
@@ -173,9 +170,6 @@ namespace Text/Regex {
 
     pub def boundedPrefix(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
         extract(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, input)
-
-
-
 
 
 

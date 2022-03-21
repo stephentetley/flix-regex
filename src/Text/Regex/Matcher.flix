@@ -50,9 +50,6 @@ namespace Text/Regex/Matcher {
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 
-    use Text/Regex/Eval.MatchEvaluator;
-    use Text/Regex/Eval.MatchEvaluator.{MatchEvaluator};
-
     pub def runMatcher(ma: Matcher[a], patt: Pattern, input: String): Result[a, String] & Impure =
         use Result.flatMap;
         let Matcher(f) = ma;
@@ -165,8 +162,6 @@ namespace Text/Regex/Matcher {
         liftPrimResult(Text/Regex/Internal/Prim.group)
 
 
-    pub def evaluate(eval: MatchEvaluator[a]): Matcher[a] =
-        Matcher(r -> Text/Regex/Eval/MatchEvaluator.runMatchEvaluator(eval, r))
 
     pub def getMatch(): Matcher[String] =
         let* ans = find!();
