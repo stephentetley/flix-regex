@@ -255,72 +255,6 @@ namespace Text/Regex {
         Text/Regex/Internal/Prim.replaceFirst(m1, to.to) as & Pure
 
 
-    ///
-    /// Return the index of the first occurence of `patt` in `s` from the left.
-    ///
-    /// If `patt` is not present in `s` return None.
-    ///
-    /// If `patt` is the empty string return None.
-    ///
-    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.find!(), Text/Regex/Matcher.start(), patt, s) as & Pure
-
-    ///
-    /// Find index of rightmost match.
-    ///
-    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findLast!(), Text/Regex/Matcher.start(), patt, s) as & Pure
-
-    pub def indexOfEndLeft(patt: Pattern, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.find!(), Text/Regex/Matcher.end(), patt, s) as & Pure
-
-    pub def indexOfEndRight(patt: Pattern, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findLast!(), Text/Regex/Matcher.end(), patt, s) as & Pure
-
-
-    ///
-    /// This is `indexOfLeft` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findFrom!(offset), Text/Regex/Matcher.start(), patt, s) as & Pure
-
-    ///
-    /// This is `indexOfRight` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findLastFrom!(offset), Text/Regex/Matcher.start(), patt, s) as & Pure
-
-    ///
-    /// This is `indexOfEndLeft` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfEndLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findFrom!(offset), Text/Regex/Matcher.end(), patt, s) as & Pure
-
-
-    /// TODO - does this function make sense - should it be before offset otherwise
-    /// it is practically the same as `indexOfEndRight`?
-    ///
-    /// This is `indexOfEndRight` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def indexOfEndRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[Int32] =
-        indexOfHelper(Text/Regex/Matcher.findLastFrom!(offset), Text/Regex/Matcher.end(), patt, s) as & Pure
-
-
-    def indexOfHelper(finder: Matcher[Bool], extract: Matcher[Int32], patt: Pattern, s: String): Option[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find!, end, throwError};
-        let m1 = {
-            let* bfound = finder;
-            if (bfound) extract else throwError("none")
-        };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
     /// Range of leftmost match
     pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
@@ -338,7 +272,39 @@ namespace Text/Regex {
         };
         Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
 
+    ///
+    /// Return the index of the first occurence of `patt` in `s` from the left.
+    ///
+    /// If `patt` is not present in `s` return None.
+    ///
+    /// If `patt` is the empty string return None.
+    ///
+    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] =
+        rangeOfLeft(patt, s) |> Option.map(r -> r.start)
 
+    ///
+    /// Find index of rightmost match.
+    ///
+    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] =
+        rangeOfRight(patt, s) |> Option.map(r -> r.start)
+
+
+
+    ///
+    /// This is `indexOfLeft` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def rangeOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
+        rangeOfHelper(Text/Regex/Matcher.findFrom!(offset), patt, s) as & Pure
+
+    ///
+    /// This is `indexOfRight` with a start offset.
+    ///
+    /// Returns `None` if `patt` does not match.
+    ///
+    pub def rangeOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
+        rangeOfHelper(Text/Regex/Matcher.findLastFrom!(offset), patt, s) as & Pure
 
 
 
@@ -347,15 +313,15 @@ namespace Text/Regex {
     /// prefix of string `s` up to `sub` and the rest of string `s` including `sub`.
     ///
     pub def breakOnLeft(patt: Pattern, s: String): (String, String) =
-        match indexOfLeft(patt, s) {
-            case None => (s, "")
-            case Some(i) => (String.sliceLeft(i, s), String.sliceRight(i, s))
+        match rangeOfLeft(patt, s) {
+            case None    => (s, "")
+            case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
 
     pub def breakAfterLeft(patt: Pattern, s: String): (String, String) =
-        match indexOfEndLeft(patt, s) {
-            case None => (s, "")
-            case Some(i) => (String.sliceLeft(i, s), String.sliceRight(i, s))
+        match rangeOfLeft(patt, s) {
+            case None    => (s, "")
+            case Some(r) => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
         }
 
 
@@ -365,8 +331,8 @@ namespace Text/Regex {
     ///
     pub def breakOnRight(patt: Pattern, s: String): (String, String) =
         match rangeOfRight(patt, s) {
-            case None => (s, "")
-            case Some(rng) => (String.sliceLeft(rng.end, s), String.sliceRight(rng.end, s))
+            case None    => (s, "")
+            case Some(r) => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
         }
 
     ///
@@ -375,8 +341,8 @@ namespace Text/Regex {
     ///
     pub def breakBeforeRight(patt: Pattern, s: String): (String, String) =
         match rangeOfRight(patt, s) {
-            case None => (s, "")
-            case Some(rng) => (String.sliceLeft(rng.start, s), String.sliceRight(rng.start, s))
+            case None    => (s, "")
+            case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
 
     ///
