@@ -83,7 +83,7 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def find!(m: Matcher[r]): Bool \ Read(r) = 
+    pub def find!(m: Matcher[r]): Bool \ Write(r) = 
         import java.util.regex.Matcher.find(): Bool & r;
         getMatcher(m) |> find
 
@@ -93,7 +93,7 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findStart!(m: Matcher[r]): Option[Int32] \ Read(r) = 
+    pub def findStart!(m: Matcher[r]): Option[Int32] \ Write(r) = 
         if (find!(m)) 
             start(m) |> Result.toOption
         else
@@ -131,7 +131,7 @@ namespace Text/Regex/Matcher {
         let* e = end(m);
         Ok({start = s, end = e})
 
-    pub def findLast!(m: Matcher[r]): Bool \ Read(r) =
+    pub def findLast!(m: Matcher[r]): Bool \ Write(r) =
         match findStart!(m) {
             case None      => false
             case Some(pos) => match findLastHelper(pos, m) {
@@ -140,7 +140,7 @@ namespace Text/Regex/Matcher {
             }
         }
         
-    def findLastHelper(lastPos: Int32, m: Matcher[r]): Result[Int32, String] \ Read(r) =
+    def findLastHelper(lastPos: Int32, m: Matcher[r]): Result[Int32, String] \ Write(r) =
         let more = find!(m);
         if (more)
             Result.flatMap(pos -> findLastHelper(pos, m), start(m))
@@ -155,13 +155,13 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Read(r) =
+    pub def findFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Write(r) =
         import java.util.regex.Matcher.find(Int32): Bool & r;
         import java.lang.Throwable.getMessage(): String & r;
         try {
             getMatcher(m) |> flip(find, pos) |> Ok
         } catch {
-            case ex: ##java.lang.Exception => Err("findFrom: ${getMessage(ex)}")
+            case ex: ##java.lang.Exception => Err("findFrom!: ${getMessage(ex)}")
         }
 
     ///
@@ -170,7 +170,7 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findStartFrom!(pos: Int32, m: Matcher[r]): Result[Option[Int32], String] \ Read(r) = 
+    pub def findStartFrom!(pos: Int32, m: Matcher[r]): Result[Option[Int32], String] \ Write(r) = 
         match findFrom!(pos, m) {
             case Err(msg)  => Err(msg)
             case Ok(true)  => start(m) |> Result.map(Some)
@@ -178,7 +178,7 @@ namespace Text/Regex/Matcher {
         }
 
 
-    pub def findLastFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Read(r) =
+    pub def findLastFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Write(r) =
         let step = x -> match x {
             case None         => Ok(false)
             case Some(first)  => match findLastHelper(first, m) {
@@ -201,7 +201,7 @@ namespace Text/Regex/Matcher {
             case ex: ##java.lang.Exception => Err("content: ${getMessage(ex)}")
         }
 
-    pub def getMatch(m: Matcher[r]): Option[String] \ Read(r) =
+    pub def findMatch!(m: Matcher[r]): Option[String] \ Write(r) =
         if (find!(m))
             content(m) |> Result.toOption
         else
@@ -257,7 +257,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Replace all the matches found by this matcher with the string `rep`.
     ///
-    pub def replaceAll(rep: String, m: Matcher[r]): String \ Read(r) =
+    pub def replaceAll(rep: String, m: Matcher[r]): String \ Write(r) =
         import java.util.regex.Matcher.replaceAll(String): String & r;
         let Matcher(m1) = m;
         replaceAll(m1, rep)
@@ -265,7 +265,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Replace the first match found by this matcher with the string `rep`.
     ///
-    pub def replaceFirst(rep: String, m: Matcher[r]): String \ Read(r) =
+    pub def replaceFirst(rep: String, m: Matcher[r]): String \ Write(r) =
         import java.util.regex.Matcher.replaceFirst(String): String & r;
         let Matcher(m1) = m;
         replaceFirst(m1, rep)

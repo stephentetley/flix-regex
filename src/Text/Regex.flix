@@ -108,11 +108,11 @@ namespace Text/Regex {
         region r {
             newMatcher(r, p, s) |> lookingAt
         }
-/*
+
     ///
     /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
     ///
-    /// This may be slower than `startsWith` because there is no primitive Java function
+    /// This will be slower than `startsWith` because there is no primitive Java function
     /// to call, instead the matches of `patt` are iterated until the last one is found.
     ///
     pub def endsWith(patt: Pattern, input: String): Bool =
@@ -126,10 +126,17 @@ namespace Text/Regex {
     // # Simple extractors
 
     ///
-    /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
+    /// Returns `true` if the entire string `s` is matched by the pattern `p`.
     ///
-    pub def matches(patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.matches, doNotModify, patt, input)
+    pub def matches(p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, content};
+        region r {
+            let m = newMatcher(r, p, s);
+            if (Text/Regex/Matcher.matches(m)) 
+                content(m) |> Result.toOption 
+            else
+                None
+        }
 
 
     ///
@@ -137,44 +144,86 @@ namespace Text/Regex {
     ///
     /// TODO `contains` returns Bool in String - needs new name
     ///
-    pub def contains(patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.find!, doNotModify, patt, input)
+    pub def contains(p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, findMatch!};
+        region r {
+            newMatcher(r, p, s) |> findMatch!
+        }
 
     ///
-    /// Returns the start of `input` matched by the pattern `patt`.
+    /// Returns the start substring of `s` matched by the pattern `p`.
     ///
-    pub def prefix(patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.lookingAt, doNotModify, patt, input)
-
+    pub def prefix(p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, content};
+        region r {
+            let m = newMatcher(r, p, s);
+            if (Text/Regex/Matcher.lookingAt(m)) 
+                content(m) |> Result.toOption 
+            else
+                None
+        }
 
 
 
 
     ///
-    /// Match input within region, `patt` must match the whole region...
+    /// Match input `s` with pattern `p`, must match the whole of the bounded region...
     ///
-    pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, input)
+    pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, matches};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => false
+                case Ok()   => matches(m)
+            }
+        }
 
     ///
     /// Match input within region
     ///
-    pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, input)
+    pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, find!};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => false
+                case Ok()   => find!(m)
+            }
+        }
+
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, input)
-
+    pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => false
+                case Ok()   => lookingAt(m)
+            }
+        }
 
     // # Bounded extractors
 
     ///
     ///
-    pub def boundedMatches(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.matches, setRegion!(bounds), patt, input)
+    pub def boundedMatches(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, content};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => None
+                case Ok()   =>
+                    if (Text/Regex/Matcher.matches(m)) 
+                        content(m) |> Result.toOption 
+                    else
+                        None
+            }
+        }
 
+/*
     pub def boundedContains(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
         extract(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, input)
 
