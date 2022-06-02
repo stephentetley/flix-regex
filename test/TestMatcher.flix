@@ -16,6 +16,7 @@
 
 namespace TestMatcher {
 
+/*
 
     /////////////////////////////////////////////////////////////////////////////
     // point                                                                   //
@@ -55,5 +56,5 @@ namespace TestMatcher {
         use Text/Regex/Matcher.{runsMatcher, getMatch, count};
         let regex = "\\p{Alpha}+";
         runsMatcher(count(3, getMatch()), regex, "aa bb cc") == Ok("aa" :: "bb" :: "cc" :: Nil)
-
+*/
 }

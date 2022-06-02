@@ -23,7 +23,7 @@ namespace Text/Regex {
     ///
     /// Represents a compiled Pattern.
     ///
-    pub opaque type Pattern = ##java.util.regex.Pattern
+    pub enum Pattern(##java.util.regex.Pattern)
 
     instance ToString[Pattern] {
         ///

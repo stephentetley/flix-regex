@@ -239,10 +239,11 @@ namespace Text/Regex/Internal/Prim {
             case _: ##java.lang.Exception => Err("endWithLabel")
         }
 
+/*
     ///
     /// Append the replacement `rep` to the string builder `sb` for the current match step.
     ///
-    pub def appendReplacement!(x: ##java.util.regex.Matcher, sb: StringBuilder, rep: String): Result[Unit, String] & Impure =
+    pub def appendReplacement!(x: ##java.util.regex.Matcher, sb: StringBuilder[r], rep: String): Result[Unit, String] \ Write(r) =
         import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher & Impure;
         try {
             let StringBuilder(sb1) = sb;
@@ -255,10 +256,11 @@ namespace Text/Regex/Internal/Prim {
     ///
     /// Append the remaining tail of the input to the string builder `sb` for the final match step.
     ///
-    pub def appendTail!(x: ##java.util.regex.Matcher, sb: StringBuilder): Unit & Impure =
+    pub def appendTail!(x: ##java.util.regex.Matcher, sb: StringBuilder[r]): Unit \ {Impure, Write(r)} =
         import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder & Impure;
         let StringBuilder(sb1) = sb;
         let _ = appendTail(x, sb1);
         ()
+*/
 
 }

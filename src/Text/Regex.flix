@@ -20,6 +20,7 @@ namespace Text/Regex {
     use Text/Regex.Pattern.Pattern;
     use Text/Regex/Internal.PrimMatcher;
 
+/*
     // # Helpers
 
     def testMatch(test: ##java.util.regex.Matcher -> Bool & ef,
@@ -75,30 +76,39 @@ namespace Text/Regex {
 
 
 
-
+*/
 
     // # Predicates
 
     ///
-    /// Returns `true` if the entire string `input` is matched by the pattern `patt`.
+    /// Returns `true` if the entire string `s` is matched by the pattern `patt`.
     ///
-    pub def isMatch(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.matches, doNotModify, patt, input)
-
-    ///
-    /// Returns `true` if the string `input` is matched by the regular expression pattern `patt`
-    /// at any position within the string.
-    ///
-    pub def isSubmatch(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.find!, doNotModify, patt, input)
+    pub def isMatch(p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, matches};
+        region r {
+            newMatcher(r, p, s) |> matches
+        }
 
 
     ///
-    /// Returns `true` if the string `input` starts the regular expression pattern `patt`.
+    /// Returns `true` if the string `input` is matched by the regular expression pattern `p`
+    /// at any position within the string `s`.
     ///
-    pub def startsWith(patt: Pattern, input: String): Bool =
-        testMatch(Text/Regex/Internal/Prim.lookingAt, doNotModify, patt, input)
+    pub def isSubmatch(p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, find!};
+        region r {
+            newMatcher(r, p, s) |> find!
+        }
 
+    ///
+    /// Returns `true` if the string `s` starts the regular expression pattern `p`.
+    ///
+    pub def startsWith(p: Pattern, s: String): Bool =
+        use Text/Regex/Matcher.{newMatcher, lookingAt};
+        region r {
+            newMatcher(r, p, s) |> lookingAt
+        }
+/*
     ///
     /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
     ///
@@ -207,19 +217,18 @@ namespace Text/Regex {
 
 
 
-    // # String API functions using regexs
+    // # String API functions using regexes
 
     ///
     /// Count the occurences of `patt` in string `s`.
     ///
     pub def countSubmatches(patt: Pattern, s: String): Int32 =
-        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s) as & Pure
+        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s)
             |> Result.getWithDefault(0)
 
-    def countMatcher(acc: Int32): Matcher[Int32] & Impure =
-        use Text/Regex/Matcher.{flatMap, find!, point};
-        let* first = find!();
-        if (first) countMatcher(acc+1) else point(acc)
+    def countMatcher(acc: Int32, m: Matcher[r]): Int32 \Read(r) =
+        let first = Text/Regex/Matcher.find!(m);
+        if (first) countMatcher(acc+1) else acc
 
 
     ///
@@ -253,24 +262,24 @@ namespace Text/Regex {
         let Pattern(patt1) = from.from;
         let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
         Text/Regex/Internal/Prim.replaceFirst(m1, to.to) as & Pure
+*/
 
-
+/*
 
     /// Range of leftmost match
     pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.find!(), patt, s) as & Pure
+        rangeOfHelper(Text/Regex/Matcher.find!(), patt, s)
 
     /// Range of rightmost match
     pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findLast!(), patt, s) as & Pure
+        rangeOfHelper(Text/Regex/Matcher.findLast!(), patt, s)
 
-    def rangeOfHelper(finder: Matcher[Bool], patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] & Impure =
-        use Text/Regex/Matcher.{flatMap, range, throwError};
-        let m1 = {
-            let* bfound = finder;
-            if (bfound) range() else throwError("none")
+    def rangeOfHelper(finder: Matcher[r] -> Bool \ Read(r), patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
+        let f1 = m -> {
+            let bfound = finder(m);
+            if (bfound) Text/Regex/Matcher.range(m) else Err("none")
         };
-        Text/Regex/Matcher.runMatcher(m1, patt, s) |> Result.toOption
+        Text/Regex/Matcher.runMatcher(f1, patt, s) |> Result.toOption
 
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
@@ -296,7 +305,7 @@ namespace Text/Regex {
     /// Returns `None` if `patt` does not match.
     ///
     pub def rangeOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findFrom!(offset), patt, s) as & Pure
+        rangeOfHelper(Text/Regex/Matcher.findFrom!(offset), patt, s)
 
     ///
     /// This is `indexOfRight` with a start offset.
@@ -304,7 +313,7 @@ namespace Text/Regex {
     /// Returns `None` if `patt` does not match.
     ///
     pub def rangeOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findLastFrom!(offset), patt, s) as & Pure
+        rangeOfHelper(Text/Regex/Matcher.findLastFrom!(offset), patt, s)
 
 
 
@@ -349,7 +358,7 @@ namespace Text/Regex {
     /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
     ///
     pub def stripPrefix(patt: Pattern, s: String): Option[String] =
-        (rangeOfHelper(Text/Regex/Matcher.lookingAt(), patt, s) as & Pure)
+        (rangeOfHelper(Text/Regex/Matcher.lookingAt(), patt, s))
             |> Option.map(rng -> String.takeRight(rng.end, s))
 
     // stripSuffix
@@ -357,5 +366,5 @@ namespace Text/Regex {
         rangeOfRight(patt, s)
             |> Option.flatMap(rng -> if (String.length(s) - 1 == rng.end) Some(String.takeLeft(rng.start, s)) else None)
 
-
+*/
 }
