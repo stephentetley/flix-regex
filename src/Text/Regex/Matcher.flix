@@ -52,16 +52,16 @@ namespace Text/Regex/Matcher {
         let Pattern(p1) = p;
         Matcher(matcher(p1, s as ##java.lang.CharSequence))
 
-/*
-    ///
-    /// Fully run a match function.
-    ///
-    pub def runMatcher(f: Matcher[r] -> a \ Read(r), p: Pattern, s: String): a =
-        region r {
-            let m = newMatcher(r, p, s);
-            f(m)
-        }
-*/
+
+    /// ///
+    /// /// Fully run a match function.
+    /// ///
+    /// pub def runMatcher(f: Matcher[r] -> a \ Read(r), p: Pattern, s: String): a =
+    ///     region r {
+    ///         let m = newMatcher(r, p, s);
+    ///         f(m)
+    ///     }
+
 
     ///
     /// Tests whether the matcher matches all of the input region.
@@ -207,45 +207,69 @@ namespace Text/Regex/Matcher {
         else
             None
 
-    /// pub def done(): Matcher[Bool] = ifThenElse(content(), _ -> point(false), point(true))
 
-    /// pub def reset!(): Matcher[Unit] = liftPrim(Text/Regex/Internal/Prim.reset!)
+    ///
+    /// Reset this matcher.
+    ///
+    pub def reset!(m: Matcher[r]): Unit  \ Write(r) =
+        import java.util.regex.Matcher.reset(): Unit & r;
+        let Matcher(m1) = m;
+        let _ = reset(m1);
+        ()
 
-    /// pub def resetInput!(input: String): Matcher[Unit] =
-    ///     liftPrim(x -> Text/Regex/Internal/Prim.resetInput!(x, input))
+    ///
+    /// Reset the input of this matcher.
+    ///
+    pub def resetInput!(s: String, m: Matcher[r]): Unit \ Write(r) =
+        import java.util.regex.Matcher.reset(##java.lang.CharSequence): Unit & r;
+        let Matcher(m1) = m;
+        reset(m1, s as ##java.lang.CharSequence);
+        ()
 
     ///
     /// Set the bounds of the matcher's region.
     ///
     pub def setBounds!(bounds: {start :: Int32, end :: Int32}, m: Matcher[r]): Result[Unit, String] \ Write(r) =
-        import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher & r;
+        import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher & r as region1;
         import java.lang.Throwable.getMessage(): String & r;
         try {
             let Matcher(m1) = m;
-            let _ = region(m1, bounds.start, bounds.end);
+            let _ = region1(m1, bounds.start, bounds.end);
             Ok()
         } catch {
             case ex: ##java.lang.Exception => Err("setBounds!: ${getMessage(ex)}")
         }
 
-    /// pub def setPattern!(patt: Pattern): Matcher[Unit] =
-    ///     let Pattern(p1) = patt;
-    ///     liftPrimResult(x -> Text/Regex/Internal/Prim.usePattern!(x, p1))
+    ///
+    /// Change the pattern used by this matcher.
+    ///
+    pub def setPattern!(p: Pattern, m: Matcher[r]): Result[Unit, String] \ Write(r) =
+        import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher & r;
+        try {
+            let Matcher(m1) = m;
+            let _ = usePattern(m1, Text/Regex/Pattern.getPattern(p));
+            Ok()
+        } catch {
+            case _: ##java.lang.Exception => Err("usePattern!")
+        }
 
 
+    ///
+    /// Replace all the matches found by this matcher with the string `rep`.
+    ///
+    pub def replaceAll(rep: String, m: Matcher[r]): String \ Read(r) =
+        import java.util.regex.Matcher.replaceAll(String): String & r;
+        let Matcher(m1) = m;
+        replaceAll(m1, rep)
 
-    /// pub def countWith(append: (a, ac) -> ac, acc: ac, n: Int32, ma: Matcher[a]): Matcher[ac] =
-    ///     if (n <= 0)
-    ///         point(acc)
-    ///     else {
-    ///         let* a = ma;
-    ///         countWith(append, append(a, acc), n-1, ma)
-    ///     }
+    ///
+    /// Replace the first match found by this matcher with the string `rep`.
+    ///
+    pub def replaceFirst(rep: String, m: Matcher[r]): String \ Read(r) =
+        import java.util.regex.Matcher.replaceFirst(String): String & r;
+        let Matcher(m1) = m;
+        replaceFirst(m1, rep)
 
-    /// pub def count(n: Int32, ma: Matcher[a]): Matcher[List[a]] =
-    ///     use Functor.{<$>};
-    ///     use Chain.{empty, snoc, toList};
-    ///     toList <$> countWith(flip(snoc), empty(), n, ma)
 
 }
 

@@ -230,56 +230,66 @@ namespace Text/Regex {
         let first = Text/Regex/Matcher.find!(m);
         if (first) countMatcher(acc+1) else acc
 
-
+*/
     ///
     /// Splits the string `s` around matches of the pattern `p`.
     ///
-    pub def split(patt: Pattern, input: String): Array[String] & Impure =
+    pub def split(p: Pattern, s: String): List[String] =
         import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String] & Impure;
-        let Pattern(p1) = patt;
-        let cs1 = input as ##java.lang.CharSequence;
-        split(p1, cs1)
+        let p1 = Text/Regex/Pattern.getPattern(p);
+        (split(p1, s as ##java.lang.CharSequence) |> Array.toList) as & Pure
+        
 
     ///
     /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
     ///
-    pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Array[String] & Impure =
+    pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): List[String] =
         let input1 = String.slice(bounds.start, bounds.end, input);
         split(patt, input1)
 
-    ///
-    /// Returns `input` with every match of the pattern `from` replaced by the string `to`.
-    ///
-    pub def replace(from: {from :: Pattern}, to: {to :: String}, input: String): String =
-        let Pattern(patt1) = from.from;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.replaceAll(m1, to.to) as & Pure
 
     ///
-    /// Returns `input` with the first match of the regular expression `patt` replaced by the string `rep`.
+    /// Returns string `s` with every match of the pattern `from` replaced by the string `to`.
     ///
-    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, input: String): String =
-        let Pattern(patt1) = from.from;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input) as & Pure;
-        Text/Regex/Internal/Prim.replaceFirst(m1, to.to) as & Pure
-*/
+    pub def replace(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+        region r {
+            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            Text/Regex/Matcher.replaceAll(to.to, m1)
+        }
 
-/*
+    ///
+    /// Returns string `s` with the first match of the regular expression `patt` replaced by the string `rep`.
+    ///
+    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+        region r {
+            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            Text/Regex/Matcher.replaceFirst(to.to, m1)
+        }
+
+
 
     /// Range of leftmost match
     pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.find!(), patt, s)
+        region r { 
+            rangeOfHelper(Text/Regex/Matcher.find!, r, patt, s)
+        }
 
     /// Range of rightmost match
     pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findLast!(), patt, s)
+        region r { 
+            rangeOfHelper(Text/Regex/Matcher.findLast!, r, patt, s)
+        }
 
-    def rangeOfHelper(finder: Matcher[r] -> Bool \ Read(r), patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        let f1 = m -> {
-            let bfound = finder(m);
-            if (bfound) Text/Regex/Matcher.range(m) else Err("none")
-        };
-        Text/Regex/Matcher.runMatcher(f1, patt, s) |> Result.toOption
+
+    def rangeOfHelper(finds: Matcher[r] -> Bool \ {Read(r), Write(r)}, r: Region[r], p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] \ {Read(r), Write(r)} =
+        let m = Text/Regex/Matcher.newMatcher(r, p, s);
+        if (finds(m)) 
+            Text/Regex/Matcher.range(m) |> Result.toOption
+        else 
+            None
+
+
+/*
 
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
