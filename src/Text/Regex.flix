@@ -18,65 +18,7 @@ namespace Text/Regex {
 
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.Pattern;
-    use Text/Regex/Internal.PrimMatcher;
 
-/*
-    // # Helpers
-
-    def testMatch(test: ##java.util.regex.Matcher -> Bool & ef,
-                    modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                    patt: Pattern,
-                    input: String): Bool =
-        match (testMatchHelper(test, modify!, patt, input) as & Pure) {
-            case Err(_) => false
-            case Ok(ans) => ans
-        }
-
-    def testMatchHelper(test: ##java.util.regex.Matcher -> Bool & ef,
-                        modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                        patt: Pattern,
-                        input: String): Result[Bool, String] & Impure =
-
-        use Result.flatMap;
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let* _ = modify!(m1);
-        Ok(test(m1))
-
-    def doNotModify(_: ##java.util.regex.Matcher): Result[Unit, String] & Impure = Ok(()) as & Impure
-
-    def setRegion!(bounds: {start:: Int32, end :: Int32}, x: ##java.util.regex.Matcher): Result[Unit, String] & Impure =
-        Text/Regex/Internal/Prim.setRegion!(x, bounds)
-
-
-    def extract(test: ##java.util.regex.Matcher -> Bool & ef,
-                modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                patt: Pattern,
-                input: String): Option[String] =
-        extractHelper(test, modify!, patt, input) as & Pure
-
-
-    def extractHelper(test: ##java.util.regex.Matcher -> Bool & ef,
-                        modify!: ##java.util.regex.Matcher -> Result[Unit, String] & Impure,
-                        patt: Pattern,
-                        input: String): Option[String] & Impure =
-        use Option.flatMap;
-        try {
-            let Pattern(patt1) = patt;
-            let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-            let* _ = Result.toOption(modify!(m1));
-            if (test(m1))
-                Result.toOption(Text/Regex/Internal/Prim.group(m1))
-            else
-                None
-        } catch {
-            case _: ##java.lang.Exception => None
-        }
-
-
-
-
-*/
 
     // # Predicates
     // Names follow `String.flix`
@@ -116,50 +58,92 @@ namespace Text/Regex {
     /// This will be slower than `startsWith` because there is no primitive Java function
     /// to call, instead the matches of `patt` are iterated until the last one is found.
     ///
-    pub def endsWith(patt: Pattern, input: String): Bool =
-        match rangeOfRight(patt, input) {
-            case None      => false
-            case Some(rng) => String.length(input) - 1 == rng.end
+    pub def endsWith(p: Pattern, s: String): Bool =
+        match lastSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_)  => false
+            case Ok(rng) => String.length(s) - 1 == rng.end
         }
-
 
 
     // # Simple extractors
 
     ///
-    /// Returns `Some(_)` if the entire string `s` is matched by the pattern `p`.
+    /// Returns `Some(ans)` if the entire string `s` is matched by the pattern `p`.
     ///
-    pub def matchAll(p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, content};
+    pub def matchAll(p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, matches, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            if (Text/Regex/Matcher.matches(m)) 
-                content(m) |> Result.toOption 
+            if (matches(m)) 
+                matchResult(m) |> Result.toOption 
             else
                 None
         }
 
 
     ///
-    /// Returns the first substring of `input` matched by the pattern `patt`.
+    /// Returns the first result matched by the pattern `p` on the input `s`.
     ///
-    /// TODO `contains` returns Bool in String - needs new name
-    ///
-    pub def firstSubmatch(p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, findMatch!};
+    pub def firstSubmatch(p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, find!, matchResult};
         region r {
-            newMatcher(r, p, s) |> findMatch!
+            let m = newMatcher(r, p, s);
+            if (find!(m)) 
+                matchResult(m) |> Result.toOption 
+            else
+                None
         }
+
+
+    ///
+    /// Returns the last result matched by the pattern `p` on the input `s`.
+    ///
+    pub def lastSubmatch(p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, findLast!, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            if (findLast!(m)) 
+                matchResult(m) |> Result.toOption 
+            else
+                None
+        }
+    
+    ///
+    /// Returns the last result matched by the pattern `p` on the input `s`.
+    ///
+    pub def lastSubmatchWithOffset(p: Pattern, o: Int32, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, findLastFrom!, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            match findLastFrom!(o, m) {
+                case Ok(true) => matchResult(m) |> Result.toOption 
+                case _        => None
+            }
+        }
+
+    ///
+    /// Returns the first result matched by the pattern `p` on the input `s`.
+    ///
+    pub def firstSubmatchWithOffset(p: Pattern, o: Int32, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, findFrom!, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            match findFrom!(o, m) {
+                case Ok(true) => matchResult(m) |> Result.toOption 
+                case _        => None
+            }
+        }
+
 
     ///
     /// Returns the start substring of `s` matched by the pattern `p`.
     ///
-    pub def matchPrefix(p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, content};
+    pub def matchPrefix(p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, lookingAt, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            if (Text/Regex/Matcher.lookingAt(m)) 
-                content(m) |> Result.toOption 
+            if (lookingAt(m)) 
+                matchResult(m) |> Result.toOption 
             else
                 None
         }
@@ -207,40 +191,59 @@ namespace Text/Regex {
 
     ///
     ///
-    pub def boundedMatchAll(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, content};
+    pub def boundedMatchAll(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, matches, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(bounds, m) {
                 case Err(_) => None
                 case Ok()   =>
-                    if (Text/Regex/Matcher.matches(m)) 
-                        content(m) |> Result.toOption 
+                    if (matches(m)) 
+                        matchResult(m) |> Result.toOption 
                     else
                         None
             }
         }
 
 
-    pub def boundedFirstSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, findMatch!};
-        region r {
-            let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
-                case Err(_) => None
-                case Ok()   => findMatch!(m)
-            }
-        }
-
-    pub def boundedMatchPrefix(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, content};
+    pub def boundedFirstSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, find!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(bounds, m) {
                 case Err(_) => None
                 case Ok()   =>
-                    if (Text/Regex/Matcher.lookingAt(m)) 
-                        content(m) |> Result.toOption 
+                    if (find!(m)) 
+                        matchResult(m) |> Result.toOption 
+                    else
+                        None
+            }
+        }
+
+    pub def boundedLastSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, findLast!, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => None
+                case Ok()   =>
+                    if (findLast!(m)) 
+                        matchResult(m) |> Result.toOption 
+                    else
+                        None
+            }
+        }
+
+
+    pub def boundedMatchPrefix(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[MatchResult] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => None
+                case Ok()   =>
+                    if (lookingAt(m)) 
+                        matchResult(m) |> Result.toOption 
                     else
                         None
             }
@@ -332,29 +335,6 @@ namespace Text/Regex {
         }
 
 
-
-    /// Range of leftmost match
-    pub def rangeOfLeft(p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        region r { 
-            rangeOfHelper(Text/Regex/Matcher.find! >> Ok, r, p, s)
-        }
-
-    /// Range of rightmost match
-    pub def rangeOfRight(p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
-        region r { 
-            rangeOfHelper(Text/Regex/Matcher.findLast! >> Ok, r, p, s)
-        }
-
-
-    def rangeOfHelper(finds: Matcher[r] -> Result[Bool, String] \ {Read(r), Write(r)}, r: Region[r], p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] \ {Read(r), Write(r)} =
-        let m = Text/Regex/Matcher.newMatcher(r, p, s);
-        match finds(m) {
-            case Ok(true) => Text/Regex/Matcher.range(m) |> Result.toOption
-            case _        => None
-        }
-
-
-
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
     ///
@@ -363,36 +343,13 @@ namespace Text/Regex {
     /// If `patt` is the empty string return None.
     ///
     pub def indexOfLeft(p: Pattern, s: String): Option[Int32] =
-        rangeOfLeft(p, s) |> Option.map(r -> r.start)
+        Option.flatMap(a -> Text/Regex/MatchResult.start(a) |> Result.toOption, firstSubmatch(p, s))
 
     ///
     /// Find index of rightmost match.
     ///
     pub def indexOfRight(p: Pattern, s: String): Option[Int32] =
-        rangeOfRight(p, s) |> Option.map(r -> r.start)
-
-
-
-
-    ///
-    /// This is `indexOfLeft` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def rangeOfLeftWithOffset(p: Pattern, o: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        region r { 
-            rangeOfHelper(Text/Regex/Matcher.findFrom!(o), r, p, s)
-        }
-
-    ///
-    /// This is `indexOfRight` with a start offset.
-    ///
-    /// Returns `None` if `patt` does not match.
-    ///
-    pub def rangeOfRightWithOffset(p: Pattern, o: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        region r {
-            rangeOfHelper(Text/Regex/Matcher.findLastFrom!(o), r, p, s)
-        }
+        Option.flatMap(a -> Text/Regex/MatchResult.start(a) |> Result.toOption, lastSubmatch(p, s))
 
 
     ///
@@ -400,15 +357,15 @@ namespace Text/Regex {
     /// prefix of string `s` up to `sub` and the rest of string `s` including `sub`.
     ///
     pub def breakOnLeft(p: Pattern, s: String): (String, String) =
-        match rangeOfLeft(p, s) {
-            case None    => (s, "")
-            case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
+        match firstSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => (s, "")
+            case Ok(r)  => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
 
     pub def breakAfterLeft(p: Pattern, s: String): (String, String) =
-        match rangeOfLeft(p, s) {
-            case None    => (s, "")
-            case Some(r) => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
+        match firstSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => (s, "")
+            case Ok(r)  => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
         }
 
 
@@ -416,10 +373,10 @@ namespace Text/Regex {
     /// Find the last instance of `substr` in string `s`, return a pair of the
     /// initial string including `substr` and suffix from `substr`.
     ///
-    pub def breakOnRight(patt: Pattern, s: String): (String, String) =
-        match rangeOfRight(patt, s) {
-            case None    => (s, "")
-            case Some(r) => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
+    pub def breakOnRight(p: Pattern, s: String): (String, String) =
+        match lastSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => (s, "")
+            case Ok(r)  => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
         }
 
     ///
@@ -427,9 +384,9 @@ namespace Text/Regex {
     /// initial string including `substr` and suffix from `substr`.
     ///
     pub def breakBeforeRight(p: Pattern, s: String): (String, String) =
-        match rangeOfRight(p, s) {
-            case None    => (s, "")
-            case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
+        match lastSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => (s, "")
+            case Ok(r)  => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
 
 
@@ -438,16 +395,19 @@ namespace Text/Regex {
     /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
     ///
     pub def stripPrefix(p: Pattern, s: String): Option[String] =
-        use Option.flatMap;
-        region r {
-            let* rng = rangeOfHelper(Text/Regex/Matcher.lookingAt >> Ok, r, p, s);
-            Some(String.takeRight(rng.end, s))
+        match matchPrefix(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => None
+            case Ok(r)  => Some(String.takeRight(r.end, s))
         }
+
+
 
     // stripSuffix
     pub def stripSuffix(p: Pattern, s: String): Option[String] =
-        rangeOfRight(p, s)
-            |> Option.flatMap(rng -> if (String.length(s) - 1 == rng.end) Some(String.takeLeft(rng.start, s)) else None)
+        match lastSubmatch(p, s) |> Option.toOk("err") |> Result.flatMap(Text/Regex/MatchResult.range) {
+            case Err(_) => None
+            case Ok(r)  => if (r.end == String.length(s) - 1) Some(String.takeLeft(r.start, s)) else None
+        }
 
     /// Rewrite Strategies
 

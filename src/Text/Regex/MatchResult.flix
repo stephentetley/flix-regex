@@ -62,6 +62,16 @@ namespace Text/Regex/MatchResult {
         } catch {
             case ex: ##java.lang.Exception => Err("end: ${getMessage(ex)}")
         }
+
+    ///
+    /// Return the start and end positions of the match result
+    ///
+    pub def range(m: MatchResult): Result[{start :: Int32, end :: Int32}, String] =
+        use Result.flatMap;
+        let* s = start(m);
+        let* e = end(m);
+        Ok({start = s, end = e})
+
     ///
     /// Return all of the text of the match result
     ///

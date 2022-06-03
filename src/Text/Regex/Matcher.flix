@@ -36,6 +36,8 @@ namespace Text/Regex/Matcher {
     use Text/Regex.{Matcher};
     use Text/Regex.Matcher.{Matcher};
 
+    use Text/Regex.MatchResult;
+    use Text/Regex.MatchResult.{MatchResult};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
 
@@ -97,6 +99,19 @@ namespace Text/Regex/Matcher {
             start(m) |> Result.toOption
         else
             None
+
+
+    ///
+    /// Return the start position of the string matched by the preceeding `find`
+    ///
+    pub def matchResult(m: Matcher[r]): Result[MatchResult, String] \ Read(r) =
+        import java.util.regex.Matcher.toMatchResult(): ##java.util.regex.MatchResult & r;
+        import java.lang.Throwable.getMessage(): String & r;
+        try {
+            getMatcher(m) |> toMatchResult |> MatchResult |> Ok
+        } catch {
+            case ex: ##java.lang.Exception => Err("matchResult: ${getMessage(ex)}")
+        }
 
 
     ///
@@ -200,11 +215,6 @@ namespace Text/Regex/Matcher {
             case ex: ##java.lang.Exception => Err("content: ${getMessage(ex)}")
         }
 
-    pub def findMatch!(m: Matcher[r]): Option[String] \ Write(r) =
-        if (find!(m))
-            content(m) |> Result.toOption
-        else
-            None
 
 
     ///
