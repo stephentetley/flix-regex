@@ -79,6 +79,7 @@ namespace Text/Regex {
 */
 
     // # Predicates
+    // Names follow `String.flix`
 
     ///
     /// Returns `true` if the entire string `s` is matched by the pattern `patt`.
@@ -126,9 +127,9 @@ namespace Text/Regex {
     // # Simple extractors
 
     ///
-    /// Returns `true` if the entire string `s` is matched by the pattern `p`.
+    /// Returns `Some(_)` if the entire string `s` is matched by the pattern `p`.
     ///
-    pub def matches(p: Pattern, s: String): Option[String] =
+    pub def matchAll(p: Pattern, s: String): Option[String] =
         use Text/Regex/Matcher.{newMatcher, content};
         region r {
             let m = newMatcher(r, p, s);
@@ -144,7 +145,7 @@ namespace Text/Regex {
     ///
     /// TODO `contains` returns Bool in String - needs new name
     ///
-    pub def contains(p: Pattern, s: String): Option[String] =
+    pub def firstSubmatch(p: Pattern, s: String): Option[String] =
         use Text/Regex/Matcher.{newMatcher, findMatch!};
         region r {
             newMatcher(r, p, s) |> findMatch!
@@ -153,7 +154,7 @@ namespace Text/Regex {
     ///
     /// Returns the start substring of `s` matched by the pattern `p`.
     ///
-    pub def prefix(p: Pattern, s: String): Option[String] =
+    pub def matchPrefix(p: Pattern, s: String): Option[String] =
         use Text/Regex/Matcher.{newMatcher, content};
         region r {
             let m = newMatcher(r, p, s);
@@ -162,9 +163,6 @@ namespace Text/Regex {
             else
                 None
         }
-
-
-
 
     ///
     /// Match input `s` with pattern `p`, must match the whole of the bounded region...
@@ -209,7 +207,7 @@ namespace Text/Regex {
 
     ///
     ///
-    pub def boundedMatches(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+    pub def boundedMatchAll(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
         use Text/Regex/Matcher.{newMatcher, setBounds!, content};
         region r {
             let m = newMatcher(r, p, s);
@@ -223,14 +221,32 @@ namespace Text/Regex {
             }
         }
 
+
+    pub def boundedFirstSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, findMatch!};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => None
+                case Ok()   => findMatch!(m)
+            }
+        }
+
+    pub def boundedMatchPrefix(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, content};
+        region r {
+            let m = newMatcher(r, p, s);
+            match setBounds!(bounds, m) {
+                case Err(_) => None
+                case Ok()   =>
+                    if (Text/Regex/Matcher.lookingAt(m)) 
+                        content(m) |> Result.toOption 
+                    else
+                        None
+            }
+        }
+
 /*
-    pub def boundedContains(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.find!, setRegion!(bounds), patt, input)
-
-    pub def boundedPrefix(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): Option[String] =
-        extract(Text/Regex/Internal/Prim.lookingAt, setRegion!(bounds), patt, input)
-
-
 
     // # Multiple results
 
@@ -318,27 +334,26 @@ namespace Text/Regex {
 
 
     /// Range of leftmost match
-    pub def rangeOfLeft(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
+    pub def rangeOfLeft(p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
         region r { 
-            rangeOfHelper(Text/Regex/Matcher.find!, r, patt, s)
+            rangeOfHelper(Text/Regex/Matcher.find! >> Ok, r, p, s)
         }
 
     /// Range of rightmost match
-    pub def rangeOfRight(patt: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
+    pub def rangeOfRight(p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] =
         region r { 
-            rangeOfHelper(Text/Regex/Matcher.findLast!, r, patt, s)
+            rangeOfHelper(Text/Regex/Matcher.findLast! >> Ok, r, p, s)
         }
 
 
-    def rangeOfHelper(finds: Matcher[r] -> Bool \ {Read(r), Write(r)}, r: Region[r], p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] \ {Read(r), Write(r)} =
+    def rangeOfHelper(finds: Matcher[r] -> Result[Bool, String] \ {Read(r), Write(r)}, r: Region[r], p: Pattern, s: String): Option[{start :: Int32, end :: Int32}] \ {Read(r), Write(r)} =
         let m = Text/Regex/Matcher.newMatcher(r, p, s);
-        if (finds(m)) 
-            Text/Regex/Matcher.range(m) |> Result.toOption
-        else 
-            None
+        match finds(m) {
+            case Ok(true) => Text/Regex/Matcher.range(m) |> Result.toOption
+            case _        => None
+        }
 
 
-/*
 
     ///
     /// Return the index of the first occurence of `patt` in `s` from the left.
@@ -347,14 +362,15 @@ namespace Text/Regex {
     ///
     /// If `patt` is the empty string return None.
     ///
-    pub def indexOfLeft(patt: Pattern, s: String): Option[Int32] =
-        rangeOfLeft(patt, s) |> Option.map(r -> r.start)
+    pub def indexOfLeft(p: Pattern, s: String): Option[Int32] =
+        rangeOfLeft(p, s) |> Option.map(r -> r.start)
 
     ///
     /// Find index of rightmost match.
     ///
-    pub def indexOfRight(patt: Pattern, s: String): Option[Int32] =
-        rangeOfRight(patt, s) |> Option.map(r -> r.start)
+    pub def indexOfRight(p: Pattern, s: String): Option[Int32] =
+        rangeOfRight(p, s) |> Option.map(r -> r.start)
+
 
 
 
@@ -363,31 +379,34 @@ namespace Text/Regex {
     ///
     /// Returns `None` if `patt` does not match.
     ///
-    pub def rangeOfLeftWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findFrom!(offset), patt, s)
+    pub def rangeOfLeftWithOffset(p: Pattern, o: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
+        region r { 
+            rangeOfHelper(Text/Regex/Matcher.findFrom!(o), r, p, s)
+        }
 
     ///
     /// This is `indexOfRight` with a start offset.
     ///
     /// Returns `None` if `patt` does not match.
     ///
-    pub def rangeOfRightWithOffset(patt: Pattern, offset: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
-        rangeOfHelper(Text/Regex/Matcher.findLastFrom!(offset), patt, s)
-
+    pub def rangeOfRightWithOffset(p: Pattern, o: Int32, s: String): Option[{start :: Int32, end :: Int32}] =
+        region r {
+            rangeOfHelper(Text/Regex/Matcher.findLastFrom!(o), r, p, s)
+        }
 
 
     ///
     /// Find the first instance of `patt` in string `s`, return a pair of the
     /// prefix of string `s` up to `sub` and the rest of string `s` including `sub`.
     ///
-    pub def breakOnLeft(patt: Pattern, s: String): (String, String) =
-        match rangeOfLeft(patt, s) {
+    pub def breakOnLeft(p: Pattern, s: String): (String, String) =
+        match rangeOfLeft(p, s) {
             case None    => (s, "")
             case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
 
-    pub def breakAfterLeft(patt: Pattern, s: String): (String, String) =
-        match rangeOfLeft(patt, s) {
+    pub def breakAfterLeft(p: Pattern, s: String): (String, String) =
+        match rangeOfLeft(p, s) {
             case None    => (s, "")
             case Some(r) => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
         }
@@ -407,23 +426,28 @@ namespace Text/Regex {
     /// Find the last instance of `substr` in string `s`, return a pair of the
     /// initial string including `substr` and suffix from `substr`.
     ///
-    pub def breakBeforeRight(patt: Pattern, s: String): (String, String) =
-        match rangeOfRight(patt, s) {
+    pub def breakBeforeRight(p: Pattern, s: String): (String, String) =
+        match rangeOfRight(p, s) {
             case None    => (s, "")
             case Some(r) => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
         }
+
+
 
     ///
     /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
     ///
     pub def stripPrefix(patt: Pattern, s: String): Option[String] =
-        (rangeOfHelper(Text/Regex/Matcher.lookingAt(), patt, s))
-            |> Option.map(rng -> String.takeRight(rng.end, s))
+        use Option.flatMap;
+        region r {
+            let* rng = rangeOfHelper(Text/Regex/Matcher.lookingAt >> Ok, r, patt, s);
+            Some(String.takeRight(rng.end, s))
+        }
 
     // stripSuffix
     pub def stripSuffix(patt: Pattern, s: String): Option[String] =
         rangeOfRight(patt, s)
             |> Option.flatMap(rng -> if (String.length(s) - 1 == rng.end) Some(String.takeLeft(rng.start, s)) else None)
 
-*/
+
 }
