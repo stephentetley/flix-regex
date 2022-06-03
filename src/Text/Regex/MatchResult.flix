@@ -75,7 +75,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return all of the text of the match result
     ///
-    pub def groupAll(m: MatchResult): Result[String, String] =
+    pub def content(m: MatchResult): Result[String, String] =
         import java.util.regex.MatchResult.group(): String & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {

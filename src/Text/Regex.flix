@@ -249,39 +249,30 @@ namespace Text/Regex {
             }
         }
 
-/*
-
     // # Multiple results
 
     ///
     /// TODO: use a "Stream" when stdlib has an implementation finalized
     ///
-    def results(patt: Pattern, eval: ##java.util.regex.Matcher -> Result[a, String] & Impure, input: String): Result[List[a], String] & Impure =
-        let Pattern(patt1) = patt;
-        let m1 = Text/Regex/Internal/Prim.newMatcher(patt1, input);
-        let iter = _ -> match Text/Regex/Internal/Prim.find!(m1) {
-            case true  => eval(m1) |> Result.map(Some)
-            case false => Ok(None)
-        };
-        List.unfoldWithOkIter(iter)
+    pub def matchResultsAll(p: Pattern, s: String): Result[List[MatchResult], String] =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            allMatchResultsHelper(m, e -> Err(e), ks -> Ok(ks))
+        }
 
-    ///
-    /// Stream...
-    ///
-    pub def contents(patt: Pattern, input: String): Result[List[String], String] & Impure =
-        results(patt, Text/Regex/Internal/Prim.group, input)
 
-    ///
-    /// Stream...
-    ///
-    pub def ranges(patt: Pattern, input: String): Result[List[{start :: Int32, end :: Int32}], String] & Impure =
-        use Result.flatMap;
-        let getRange = x -> {
-            let* start  = Text/Regex/Internal/Prim.start(x);
-            let* end    = Text/Regex/Internal/Prim.end(x);
-            Ok({start = start, end = end})
-        };
-        results(patt, getRange, input)
+    def allMatchResultsHelper(m: Matcher[r], 
+                                fk: String -> Result[List[MatchResult], String],
+                                sk: List[MatchResult] -> Result[List[MatchResult], String]): Result[List[MatchResult], String] \Read(r) =
+        use Text/Regex/Matcher.{find!, matchResult};
+        if (find!(m))
+            match matchResult(m) {
+                case Err(msg) => fk(msg)
+                case Ok(r)    => allMatchResultsHelper(m, fk, ks -> sk(r :: ks))
+            }
+        else
+            sk(Nil)
 
 
 
@@ -290,15 +281,21 @@ namespace Text/Regex {
     ///
     /// Count the occurences of `patt` in string `s`.
     ///
-    pub def countSubmatches(patt: Pattern, s: String): Int32 =
-        Text/Regex/Matcher.runMatcher(countMatcher(0), patt, s)
-            |> Result.getWithDefault(0)
+    pub def countSubmatches(p: Pattern, s: String): Int32 =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            countMatcher(0, m)
+        }
 
     def countMatcher(acc: Int32, m: Matcher[r]): Int32 \Read(r) =
-        let first = Text/Regex/Matcher.find!(m);
-        if (first) countMatcher(acc+1) else acc
+        use Text/Regex/Matcher.{find!};
+        if (find!(m))
+            countMatcher(acc+1, m) 
+        else 
+            acc
 
-*/
+
     ///
     /// Splits the string `s` around matches of the pattern `p`.
     ///
@@ -314,25 +311,6 @@ namespace Text/Regex {
     pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): List[String] =
         let input1 = String.slice(bounds.start, bounds.end, input);
         split(patt, input1)
-
-
-    ///
-    /// Returns string `s` with every match of the pattern `from` replaced by the string `to`.
-    ///
-    pub def replace(from: {from :: Pattern}, to: {to :: String}, s: String): String =
-        region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
-            Text/Regex/Matcher.replaceAll(to.to, m1)
-        }
-
-    ///
-    /// Returns string `s` with the first match of the regular expression `patt` replaced by the string `rep`.
-    ///
-    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, s: String): String =
-        region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
-            Text/Regex/Matcher.replaceFirst(to.to, m1)
-        }
 
 
     ///
@@ -409,17 +387,47 @@ namespace Text/Regex {
             case Ok(r)  => if (r.end == String.length(s) - 1) Some(String.takeLeft(r.start, s)) else None
         }
 
+    // Replace
+
+    ///
+    /// Returns string `s` with every match of the pattern `from` replaced by the string `to`.
+    ///
+    pub def replace(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+        region r {
+            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            Text/Regex/Matcher.replaceAll(to.to, m1)
+        }
+
+    ///
+    /// Returns string `s` with the first match of the regular expression `patt` replaced by the string `rep`.
+    ///
+    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+        region r {
+            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            Text/Regex/Matcher.replaceFirst(to.to, m1)
+        }
+
     /// Rewrite Strategies
 
-/*
-    pub def rewriteAll(fn: String -> String, p: Pattern, s: String): String =
-        let* more = find();
-        if (more) {
-            let* s = content();
-            let* _ = appendReplacement!(fn(s));
-            rewriteAll!(fn)
-        } else
-            appendTail!()
-*/
+    pub def rewriteAll(f: String -> String, p: Pattern, s: String): String =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            let sb = new StringBuilder(r);
+            rewriteAllHelper(f, sb, m);
+            StringBuilder.toString(sb)
+        }
+
+    def rewriteAllHelper(f: String -> String, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
+        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text/Regex/MatchResult.{content};
+        if (find!(m))
+            match Result.flatMap(content, matchResult(m)) {
+                case Err(_) => ()
+                case Ok(s)  => {appendReplacement!(f(s), sb, m); rewriteAllHelper(f, sb, m)}
+            }
+        else
+            appendTail!(sb, m)
+
 
 }

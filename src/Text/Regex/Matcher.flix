@@ -279,6 +279,27 @@ namespace Text/Regex/Matcher {
         let Matcher(m1) = m;
         replaceFirst(m1, rep)
 
+    ///
+    /// Append replacement...
+    ///
+    pub def appendReplacement!(rep: String, sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Write(r2)} =
+        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher & r1 and r2;
+        let Matcher(m1) = m;
+        let StringBuilder(sb1) = sb;
+        let _ = appendReplacement(m1, sb1, rep);
+        ()
+
+    ///
+    /// Append tail of matcher to string builder...
+    ///
+    pub def appendTail!(sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Write(r2)} =
+        import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder & r1 and r2;
+        let Matcher(m1) = m;
+        let StringBuilder(sb1) = sb;
+        let _ = appendTail(m1, sb1);
+        ()
+
+
 
 }
 
