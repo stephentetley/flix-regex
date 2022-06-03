@@ -463,4 +463,96 @@ namespace Text/Regex {
         else
             appendTail!(sb, m)
 
+
+    pub def rewriteSome(f: String -> Option[String], p: Pattern, s: String): String =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            let sb = new StringBuilder(r);
+            rewriteSomeHelper(f, sb, m);
+            StringBuilder.toString(sb)
+        }
+
+    def rewriteSomeHelper(f: String -> Option[String], sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
+        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text/Regex/MatchResult.{content};
+        if (find!(m))
+            match matchResult(m) |> content {
+                case Err(_) => ()
+                case Ok(s)  => match f(s) {
+                    case Some(s1) => {appendReplacement!(s1, sb, m); rewriteSomeHelper(f, sb, m)}
+                    case None     => {appendReplacement!(s, sb, m); rewriteSomeHelper(f, sb, m)}
+                }
+            }
+        else
+            appendTail!(sb, m)
+
+    pub def rewriteAllWithIndex(f: (Int32, String) -> String, p: Pattern, s: String): String =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            let sb = new StringBuilder(r);
+            rewriteAllWithIndexHelper(f, 0, sb, m);
+            StringBuilder.toString(sb)
+        }
+
+    def rewriteAllWithIndexHelper(f: (Int32, String) -> String, acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
+        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text/Regex/MatchResult.{content};
+        if (find!(m))
+            match matchResult(m) |> content {
+                case Err(_) => ()
+                case Ok(s)  => {appendReplacement!(f(acc, s), sb, m); rewriteAllWithIndexHelper(f, acc+1, sb, m)}
+            }
+        else
+            appendTail!(sb, m)
+
+
+    pub def rewriteSomeWithIndex(f: (Int32, String) -> Option[String], p: Pattern, s: String): String =
+        use Text/Regex/Matcher.{newMatcher};
+        region r {
+            let m = newMatcher(r, p, s);
+            let sb = new StringBuilder(r);
+            rewriteSomeWithIndexHelper(f, 0, sb, m);
+            StringBuilder.toString(sb)
+        }
+
+    def rewriteSomeWithIndexHelper(f: (Int32, String) -> Option[String], acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
+        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text/Regex/MatchResult.{content};
+        if (find!(m))
+            match matchResult(m) |> content {
+                case Err(_) => ()
+                case Ok(s)  => match f(acc, s) {
+                    case Some(s1) => {appendReplacement!(s1, sb, m); rewriteSomeWithIndexHelper(f, acc+1, sb, m)}
+                    case None     => {appendReplacement!(s, sb, m); rewriteSomeWithIndexHelper(f, acc+1, sb, m)}
+                }
+            }
+        else
+            appendTail!(sb, m)
+
+
+    pub def rewriteFirstN(ntimes: Int32, f: String -> String, p: Pattern, s: String): String =
+        use Text/Regex/Matcher.{newMatcher};
+        if (ntimes <= 0 )
+            s
+        else 
+            region r {
+                let m = newMatcher(r, p, s);
+                let sb = new StringBuilder(r);
+                rewriteFirstNHelper(ntimes, f, 0, sb, m);
+                StringBuilder.toString(sb)
+            }
+
+    def rewriteFirstNHelper(ntimes: Int32, f: String -> String, acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
+        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text/Regex/MatchResult.{content};
+        if (ntimes < acc and find!(m))
+            match matchResult(m) |> content {
+                case Err(_) => ()
+                case Ok(s)  => {appendReplacement!(f(s), sb, m); rewriteFirstNHelper(ntimes, f, acc+1, sb, m)}
+            }
+        else
+            appendTail!(sb, m)
+
 }
