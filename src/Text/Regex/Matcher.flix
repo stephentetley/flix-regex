@@ -15,8 +15,7 @@
  */
 
 
-/// This is a "steppable" matcher like .Net `Regex.Match` but wrapped as a monad.
-/// It does not support backtracking so cannot be made an instance of `Alternative`.
+/// TODO - if we add MatchResult does make for a tidier API?
 
 namespace Text/Regex {
 

@@ -437,17 +437,29 @@ namespace Text/Regex {
     ///
     /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
     ///
-    pub def stripPrefix(patt: Pattern, s: String): Option[String] =
+    pub def stripPrefix(p: Pattern, s: String): Option[String] =
         use Option.flatMap;
         region r {
-            let* rng = rangeOfHelper(Text/Regex/Matcher.lookingAt >> Ok, r, patt, s);
+            let* rng = rangeOfHelper(Text/Regex/Matcher.lookingAt >> Ok, r, p, s);
             Some(String.takeRight(rng.end, s))
         }
 
     // stripSuffix
-    pub def stripSuffix(patt: Pattern, s: String): Option[String] =
-        rangeOfRight(patt, s)
+    pub def stripSuffix(p: Pattern, s: String): Option[String] =
+        rangeOfRight(p, s)
             |> Option.flatMap(rng -> if (String.length(s) - 1 == rng.end) Some(String.takeLeft(rng.start, s)) else None)
 
+    /// Rewrite Strategies
+
+/*
+    pub def rewriteAll(fn: String -> String, p: Pattern, s: String): String =
+        let* more = find();
+        if (more) {
+            let* s = content();
+            let* _ = appendReplacement!(fn(s));
+            rewriteAll!(fn)
+        } else
+            appendTail!()
+*/
 
 }
