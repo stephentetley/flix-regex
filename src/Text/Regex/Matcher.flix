@@ -104,13 +104,13 @@ namespace Text/Regex/Matcher {
     ///
     /// Return the MatchResult of the preceeding `find`
     ///
-    pub def matchResult(m: Matcher[r]): Result[MatchResult, String] \ Read(r) =
+    pub def matchResult(m: Matcher[r]): MatchResult \ Read(r) =
         import java.util.regex.Matcher.toMatchResult(): ##java.util.regex.MatchResult & r;
         import java.lang.Throwable.getMessage(): String & r;
         try {
-            getMatcher(m) |> toMatchResult |> MatchResult |> Ok
+            getMatcher(m) |> toMatchResult |> Ok |> MatchResult
         } catch {
-            case ex: ##java.lang.Exception => Err("matchResult: ${getMessage(ex)}")
+            case ex: ##java.lang.Exception => MatchResult(Err("matchResult: ${getMessage(ex)}"))
         }
 
 

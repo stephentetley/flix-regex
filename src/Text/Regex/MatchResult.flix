@@ -25,7 +25,7 @@ namespace Text/Regex {
     ///
     /// Represents a MatchResult.
     ///
-    pub enum MatchResult(##java.util.regex.MatchResult)
+    pub enum MatchResult(Result[##java.util.regex.MatchResult, String])
 
 
 }
@@ -35,7 +35,7 @@ namespace Text/Regex/MatchResult {
     use Text/Regex.MatchResult;
     use Text/Regex.MatchResult.{MatchResult};
 
-    def getMatchResult(m: MatchResult): ##java.util.regex.MatchResult = 
+    def getMatchResult(m: MatchResult): Result[##java.util.regex.MatchResult, String] = 
         let MatchResult(m1) = m;
         m1
 
@@ -47,7 +47,10 @@ namespace Text/Regex/MatchResult {
             case Err(_) => false
             case Ok(_)  => true
         }
+    
+    pub def noMatch(): MatchResult = MatchResult(Err("noMatch"))
 
+    pub def throwError(msg: String): MatchResult = MatchResult(Err(msg))
 
     ///
     /// Return the start position of the match result
@@ -56,7 +59,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.start(): Int32 & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            getMatchResult(m) |> start |> Ok
+            getMatchResult(m) |> Result.map(start)
         } catch {
             case ex: ##java.lang.Exception => Err("start: ${getMessage(ex)}")
         }
@@ -68,7 +71,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.end(): Int32 & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            getMatchResult(m) |> end |> Ok
+            getMatchResult(m) |> Result.map(end)
         } catch {
             case ex: ##java.lang.Exception => Err("end: ${getMessage(ex)}")
         }
@@ -89,7 +92,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.group(): String & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            getMatchResult(m) |> group |> Ok
+            getMatchResult(m) |> Result.map(group)
         } catch {
             case ex: ##java.lang.Exception => Err("group: ${getMessage(ex)}")
         }
@@ -103,8 +106,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.group(Int32): String & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            let m1 = getMatchResult(m);
-            group(m1, i-1) |> Ok
+            getMatchResult(m) |> Result.map(m1 -> group(m1, i-1))
         } catch {
             case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
         }
@@ -116,7 +118,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.groupCount(): Int32 & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            getMatchResult(m) |> groupCount |> Ok
+            getMatchResult(m) |> Result.map(groupCount)
         } catch {
             case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
         }
