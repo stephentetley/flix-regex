@@ -23,7 +23,7 @@ namespace Text/Regex {
     ///
     /// Represents a compiled Pattern.
     ///
-    pub opaque type Pattern = ##java.util.regex.Pattern
+    pub enum Pattern(##java.util.regex.Pattern)
 
     instance ToString[Pattern] {
         ///
@@ -101,6 +101,12 @@ namespace Text/Regex/Pattern {
         List.filter(check, CanonEq :: CaseInsenstive :: Comments :: Dotall :: Literal ::
                             Multiline :: UnicodeCase :: UnicodeCharacterClass :: UnixLines :: Nil)
 
+
+    pub def getPattern(p: Pattern): ##java.util.regex.Pattern =
+        let Pattern(p1) = p;
+        p1
+
+
     ///
     /// Compile the regular expression `regex` into a Pattern.
     ///
@@ -163,7 +169,7 @@ namespace Text/Regex/Pattern {
     ///
     /// Return the regular expression used to build this pattern.
     ///
-    pub def getPattern(patt: Pattern): String =
+    pub def getRegex(patt: Pattern): String =
         import java.util.regex.Pattern.pattern(): String & Pure;
         let Pattern(p1) = patt;
         pattern(p1)
@@ -178,11 +184,11 @@ namespace Text/Regex/Pattern {
         listFlags(i)
 
     ///
-    /// Recompile the pattern `patt`, modifying its source pattern with `f`.
+    /// Recompile the pattern `patt`, modifying its source regex with the function `f`.
     ///
-    pub def modifyPattern(f: String -> String, patt: Pattern): Result[Pattern, String] =
+    pub def modifyRegex(f: String -> String, patt: Pattern): Result[Pattern, String] =
         let flags = getFlags(patt);
-        let src = getPattern(patt);
+        let src = getRegex(patt);
         compileWithFlags(f(src), Multiline :: flags)
 
 
