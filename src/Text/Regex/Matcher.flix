@@ -102,7 +102,7 @@ namespace Text/Regex/Matcher {
 
 
     ///
-    /// Return the start position of the string matched by the preceeding `find`
+    /// Return the MatchResult of the preceeding `find`
     ///
     pub def matchResult(m: Matcher[r]): Result[MatchResult, String] \ Read(r) =
         import java.util.regex.Matcher.toMatchResult(): ##java.util.regex.MatchResult & r;

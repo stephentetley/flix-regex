@@ -40,6 +40,16 @@ namespace Text/Regex/MatchResult {
         m1
 
     ///
+    /// is the match result valid?
+    ///
+    pub def isValid(m: MatchResult): Bool =
+        match start(m) {
+            case Err(_) => false
+            case Ok(_)  => true
+        }
+
+
+    ///
     /// Return the start position of the match result
     ///
     pub def start(m: MatchResult): Result[Int32, String] =

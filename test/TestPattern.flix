@@ -16,7 +16,6 @@
 
 namespace TestPattern {
 
-/*
 
     /////////////////////////////////////////////////////////////////////////////
     // toString                                                                //
@@ -32,15 +31,15 @@ namespace TestPattern {
         step()
 
     /////////////////////////////////////////////////////////////////////////////
-    // getPattern                                                              //
+    // getRegex                                                                //
     /////////////////////////////////////////////////////////////////////////////
 
     @test
-    def getPattern01(): Bool =
+    def getRegex01(): Bool =
         use Result.flatMap;
         let step = () -> {
             let* p1 = Text/Regex/Pattern.compile("\\s+");
-            Ok(Text/Regex/Pattern.getPattern(p1))
+            Ok(Text/Regex/Pattern.getRegex(p1))
         };
         step() == Ok("\\s+")
 
@@ -102,6 +101,6 @@ namespace TestPattern {
         use Text/Regex/Pattern.{unmatchable};
         Text/Regex.isMatch(unmatchable(), String.unlines("aaa" :: "bbb" :: Nil)) == false
 
-*/
+
 
 }
