@@ -54,15 +54,6 @@ namespace Text/Regex/Matcher {
         Matcher(matcher(p1, s as ##java.lang.CharSequence))
 
 
-    /// ///
-    /// /// Fully run a match function.
-    /// ///
-    /// pub def runMatcher(f: Matcher[r] -> a \ Read(r), p: Pattern, s: String): a =
-    ///     region r {
-    ///         let m = newMatcher(r, p, s);
-    ///         f(m)
-    ///     }
-
 
     ///
     /// Tests whether the matcher matches all of the input region.

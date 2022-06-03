@@ -80,6 +80,12 @@ namespace Text/Regex {
                 Text/Regex/MatchResult.noMatch()
         }
 
+    ///
+    /// Returns `Some(ans)` if the entire string `s` is matched by the pattern `p`.
+    ///
+    pub def matchAllContent(p: Pattern, s: String): Option[String] =
+        matchAll(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
 
     ///
     /// Returns the first result matched by the pattern `p` on the input `s`.
@@ -93,6 +99,9 @@ namespace Text/Regex {
             else
                 Text/Regex/MatchResult.noMatch()
         }
+
+    pub def firstSubmatchContent(p: Pattern, s: String): Option[String] =
+        firstSubmatch(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
 
     ///
@@ -108,18 +117,10 @@ namespace Text/Regex {
                 Text/Regex/MatchResult.noMatch()
         }
     
-    ///
-    /// Returns the last result matched by the pattern `p` on the input `s`.
-    ///
-    pub def lastSubmatchWithOffset(p: Pattern, o: Int32, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, findLastFrom!, matchResult};
-        region r {
-            let m = newMatcher(r, p, s);
-            match findLastFrom!(o, m) {
-                case Ok(true) => matchResult(m)
-                case _        => Text/Regex/MatchResult.noMatch()
-            }
-        }
+
+    pub def lastSubmatchContent(p: Pattern, s: String): Option[String] =
+        lastSubmatch(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
 
     ///
     /// Returns the first result matched by the pattern `p` on the input `s`.
@@ -134,6 +135,25 @@ namespace Text/Regex {
             }
         }
 
+    pub def firstSubmatchWithOffsetContent(p: Pattern, o: Int32, s: String): Option[String] =
+        firstSubmatchWithOffset(p, o, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
+    ///
+    /// Returns the last result matched by the pattern `p` on the input `s`.
+    ///
+    pub def lastSubmatchWithOffset(p: Pattern, o: Int32, s: String): MatchResult =
+        use Text/Regex/Matcher.{newMatcher, findLastFrom!, matchResult};
+        region r {
+            let m = newMatcher(r, p, s);
+            match findLastFrom!(o, m) {
+                case Ok(true) => matchResult(m)
+                case _        => Text/Regex/MatchResult.noMatch()
+            }
+        }
+
+    pub def lastSubmatchWithOffsetContent(p: Pattern, o: Int32, s: String): Option[String] =
+        lastSubmatchWithOffset(p, o, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
 
     ///
     /// Returns the start substring of `s` matched by the pattern `p`.
@@ -147,6 +167,10 @@ namespace Text/Regex {
             else
                 Text/Regex/MatchResult.noMatch()
         }
+
+    pub def matchPrefixContent(p: Pattern, s: String): Option[String] =
+        matchPrefix(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
 
     ///
     /// Match input `s` with pattern `p`, must match the whole of the bounded region...
@@ -206,6 +230,9 @@ namespace Text/Regex {
         }
 
 
+    pub def boundedMatchAllContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        boundedMatchAll(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
     pub def boundedFirstSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, find!, matchResult};
         region r {
@@ -219,6 +246,9 @@ namespace Text/Regex {
                         Text/Regex/MatchResult.noMatch()
             }
         }
+
+    pub def boundedFirstSubmatchContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        boundedFirstSubmatch(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
     pub def boundedLastSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, findLast!, matchResult};
@@ -234,6 +264,8 @@ namespace Text/Regex {
             }
         }
 
+    pub def boundedLastSubmatchContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        boundedLastSubmatch(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
     pub def boundedMatchPrefix(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, matchResult};
@@ -248,6 +280,10 @@ namespace Text/Regex {
                         Text/Regex/MatchResult.noMatch()
             }
         }
+
+    pub def boundedMatchPrefixContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
+        boundedMatchPrefix(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+
 
     // # Multiple results
 
@@ -426,6 +462,5 @@ namespace Text/Regex {
             }
         else
             appendTail!(sb, m)
-
 
 }
