@@ -106,7 +106,7 @@ namespace Text/Regex/MatchResult {
         import java.util.regex.MatchResult.group(Int32): String & Pure;
         import java.lang.Throwable.getMessage(): String & Pure;
         try {
-            getMatchResult(m) |> Result.map(m1 -> group(m1, i-1))
+            getMatchResult(m) |> Result.map(m1 -> group(m1, i+1))
         } catch {
             case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
         }

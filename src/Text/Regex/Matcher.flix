@@ -207,6 +207,39 @@ namespace Text/Regex/Matcher {
         }
 
 
+    ///
+    /// Return the text of the group at index `i` in the match result
+    ///
+    /// 0 indexed.
+    ///
+    /// Note this function is not pure because Matcher is not pure. 
+    /// The datatype `MatchResult` represents immutable matches but it has a
+    /// much smaller API than Matcher.
+    ///
+    pub def groupAt(i: Int32, m: Matcher[r]): Result[String, String] \ Read(r) =
+        import java.util.regex.Matcher.group(Int32): String & r;
+        import java.lang.Throwable.getMessage(): String & r;
+        try {
+            getMatcher(m) |> flip(group, i+1) |> Ok
+        } catch {
+            case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
+        }
+
+    ///
+    /// Return the text of the group at index `i` in the match result
+    ///
+    /// Note this function is not pure because Matcher is not pure.
+    /// The datatype `MatchResult` represents immutable matches but it has a
+    /// much smaller API than Matcher and it does not cover named capture groups.
+    ///
+    pub def groupNamed(label: String, m: Matcher[r]): Result[String, String] \ Read(r) =
+        import java.util.regex.Matcher.group(String): String & r;
+        import java.lang.Throwable.getMessage(): String & r;
+        try {
+            getMatcher(m) |> flip(group, label) |> Ok
+        } catch {
+            case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
+        }
 
     ///
     /// Reset this matcher.
