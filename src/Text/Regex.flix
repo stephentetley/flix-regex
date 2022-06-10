@@ -322,7 +322,7 @@ namespace Text/Regex {
             countMatcher(0, m)
         }
 
-    def countMatcher(acc: Int32, m: Matcher[r]): Int32 \Read(r) =
+    def countMatcher(acc: Int32, m: Matcher[r]): Int32 \ Read(r) =
         use Text/Regex/Matcher.{find!};
         if (find!(m))
             countMatcher(acc+1, m) 
@@ -334,9 +334,12 @@ namespace Text/Regex {
     /// Splits the string `s` around matches of the pattern `p`.
     ///
     pub def split(p: Pattern, s: String): List[String] =
-        import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String] & Impure;
-        let p1 = Text/Regex/Pattern.getPattern(p);
-        (split(p1, s as ##java.lang.CharSequence) |> Array.toList) as & Pure
+        region r {
+            import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String, r] & r;
+            let p1 = Text/Regex/Pattern.getPattern(p);
+            let arr = {[] @ r; split(p1, s as ##java.lang.CharSequence)};
+            arr |> Array.toList
+        }
         
 
     ///
