@@ -116,11 +116,12 @@ namespace Text/Regex/MatchResult {
     ///
     pub def groupCount(m: MatchResult): Result[Int32, String] =
         import java.util.regex.MatchResult.groupCount(): Int32 & Pure;
-        import java.lang.Throwable.getMessage(): String & Pure;
         try {
             getMatchResult(m) |> Result.map(groupCount)
         } catch {
-            case ex: ##java.lang.Exception => Err("groupAt: ${getMessage(ex)}")
+            case ex: ##java.lang.Exception => 
+                import java.lang.Throwable.getMessage(): String & Pure;
+                Err("groupAt: ${getMessage(ex)}")
         }
 
 

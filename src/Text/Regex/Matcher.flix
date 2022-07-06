@@ -15,10 +15,13 @@
  */
 
 
-/// TODO - if we add MatchResult does make for a tidier API?
 
 namespace Text/Regex {
 
+
+    /// Matcher is imperative - it can be seen a a stepper through a stream 
+    /// of matches. The matcher is updated with the function find! to move to 
+    /// the next match.
     pub enum Matcher[_: Region](##java.util.regex.Matcher)
 
     
@@ -306,7 +309,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Append replacement...
     ///
-    pub def appendReplacement!(rep: String, sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Write(r2)} =
+    pub def appendReplacement!(rep: String, sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Read(r2)} =
         import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher & r1 and r2;
         let Matcher(m1) = m;
         let StringBuilder(sb1) = sb;
@@ -316,7 +319,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Append tail of matcher to string builder...
     ///
-    pub def appendTail!(sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Write(r2)} =
+    pub def appendTail!(sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Read(r2)} =
         import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder & r1 and r2;
         let Matcher(m1) = m;
         let StringBuilder(sb1) = sb;

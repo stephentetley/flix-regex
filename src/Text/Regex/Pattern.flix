@@ -22,6 +22,7 @@ namespace Text/Regex {
 
     ///
     /// Represents a compiled Pattern.
+    /// Immutable
     ///
     pub enum Pattern(##java.util.regex.Pattern)
 

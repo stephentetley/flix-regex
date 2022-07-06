@@ -333,13 +333,13 @@ namespace Text/Regex {
     ///
     /// Splits the string `s` around matches of the pattern `p`.
     ///
-    pub def split(p: Pattern, s: String): List[String] =
-        region r {
-            import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String, r] & r;
-            let p1 = Text/Regex/Pattern.getPattern(p);
-            let arr = {[] @ r; split(p1, s as ##java.lang.CharSequence)};
-            arr |> Array.toList
-        }
+    pub def split(p: Pattern, s: String): List[String] = region r {
+        import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String, r] \ Write(r);
+        let _ = r; // This avoids a redundancy error.
+        let p1 = Text/Regex/Pattern.getPattern(p);
+        let arr = split(p1, s as ##java.lang.CharSequence);
+        arr |> Array.toList
+    }
         
 
     ///
