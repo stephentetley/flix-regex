@@ -2,6 +2,13 @@
 
 A regex library for Flix.
 
-This is code previously developed in the repo `flix-sandbox`. It has been moved into a separate project so it can be installed (from source) more easily.
+This library provides functionality via wrapping `java.util.regex.Pattern` , `java.util.regex.Matcher`
+and `java.util.regex.MatchResult`.
 
-June 2022 - `flix-regex` is currently being rewritten to use regions.
+`java.util.regex.MatchResult` does not proved access to named capture groups (it only provides indexed access).
+
+The project `regex-eval` extends `flix-regex` with named capture groups.
+
+https://github.com/stephentetley/regex-eval
+
+License: Apache 2.0

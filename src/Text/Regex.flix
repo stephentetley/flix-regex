@@ -341,6 +341,8 @@ namespace Text/Regex {
         arr |> Array.toList
     }
         
+    /// TODO split - Iterator / stream version...
+
 
     ///
     /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
