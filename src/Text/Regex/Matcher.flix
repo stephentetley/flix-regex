@@ -52,7 +52,7 @@ namespace Text/Regex/Matcher {
     /// Create a Matcher for Pattern `patt` on the source String `input`.
     ///
     pub def newMatcher(_: Region[r], p: Pattern, s: String): Matcher[r] \ Write(r) =
-        import java.util.regex.Pattern.matcher(##java.lang.CharSequence): ##java.util.regex.Matcher & r;
+        import java.util.regex.Pattern.matcher(##java.lang.CharSequence): ##java.util.regex.Matcher \ r;
         let Pattern(p1) = p;
         Matcher(matcher(p1, s as ##java.lang.CharSequence))
 
@@ -62,14 +62,14 @@ namespace Text/Regex/Matcher {
     /// Tests whether the matcher matches all of the input region.
     ///
     pub def matches(m: Matcher[r]): Bool \ Read(r) = 
-        import java.util.regex.Matcher.matches(): Bool & r;
+        import java.util.regex.Matcher.matches(): Bool \ r;
         getMatcher(m) |> matches
 
     ///
     /// Tests whether the matcher matches the start of the input region.
     ///
     pub def lookingAt(m: Matcher[r]): Bool \ Read(r) = 
-        import java.util.regex.Matcher.lookingAt(): Bool & r;
+        import java.util.regex.Matcher.lookingAt(): Bool \ r;
         getMatcher(m) |> lookingAt
 
     ///
@@ -79,7 +79,7 @@ namespace Text/Regex/Matcher {
     /// The internal state of the matcher is updated.
     ///
     pub def find!(m: Matcher[r]): Bool \ Write(r) = 
-        import java.util.regex.Matcher.find(): Bool & r;
+        import java.util.regex.Matcher.find(): Bool \ r;
         getMatcher(m) |> find
 
     ///
@@ -99,8 +99,8 @@ namespace Text/Regex/Matcher {
     /// Return the MatchResult of the preceeding `find`
     ///
     pub def matchResult(m: Matcher[r]): MatchResult \ Read(r) =
-        import java.util.regex.Matcher.toMatchResult(): ##java.util.regex.MatchResult & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.toMatchResult(): ##java.util.regex.MatchResult \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> toMatchResult |> Ok |> MatchResult
         } catch {
@@ -112,8 +112,8 @@ namespace Text/Regex/Matcher {
     /// Return the start position of the string matched by the preceeding `find`
     ///
     pub def start(m: Matcher[r]): Result[Int32, String] \ Read(r) =
-        import java.util.regex.Matcher.start(): Int32 & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.start(): Int32 \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> start |> Ok
         } catch {
@@ -125,8 +125,8 @@ namespace Text/Regex/Matcher {
     /// Return the end position of the string matched by the preceeding `find`
     ///
     pub def end(m: Matcher[r]): Result[Int32, String] \ Read(r) =
-        import java.util.regex.Matcher.end(): Int32 & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.end(): Int32 \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> end |> Ok
         } catch {
@@ -164,8 +164,8 @@ namespace Text/Regex/Matcher {
     /// The internal state of the matcher is updated.
     ///
     pub def findFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Write(r) =
-        import java.util.regex.Matcher.find(Int32): Bool & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.find(Int32): Bool \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> flip(find, pos) |> Ok
         } catch {
@@ -201,8 +201,8 @@ namespace Text/Regex/Matcher {
     /// Return the string matched by the preceeding `find`
     ///
     pub def content(m: Matcher[r]): Result[String, String] \ Read(r) =
-        import java.util.regex.Matcher.group(): String & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.group(): String \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> group |> Ok
         } catch {
@@ -220,8 +220,8 @@ namespace Text/Regex/Matcher {
     /// much smaller API than Matcher.
     ///
     pub def groupAt(i: Int32, m: Matcher[r]): Result[String, String] \ Read(r) =
-        import java.util.regex.Matcher.group(Int32): String & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.group(Int32): String \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> flip(group, i+1) |> Ok
         } catch {
@@ -236,8 +236,8 @@ namespace Text/Regex/Matcher {
     /// much smaller API than Matcher and it does not cover named capture groups.
     ///
     pub def groupNamed(label: String, m: Matcher[r]): Result[String, String] \ Read(r) =
-        import java.util.regex.Matcher.group(String): String & r;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.group(String): String \ r;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             getMatcher(m) |> flip(group, label) |> Ok
         } catch {
@@ -248,26 +248,26 @@ namespace Text/Regex/Matcher {
     /// Reset this matcher.
     ///
     pub def reset!(m: Matcher[r]): Unit  \ Write(r) =
-        import java.util.regex.Matcher.reset(): Unit & r;
+        import java.util.regex.Matcher.reset(): ##java.util.regex.Matcher \ r;
         let Matcher(m1) = m;
-        let _ = reset(m1);
+        discard reset(m1);
         ()
 
     ///
     /// Reset the input of this matcher.
     ///
     pub def resetInput!(s: String, m: Matcher[r]): Unit \ Write(r) =
-        import java.util.regex.Matcher.reset(##java.lang.CharSequence): Unit & r;
+        import java.util.regex.Matcher.reset(##java.lang.CharSequence): ##java.util.regex.Matcher \ r;
         let Matcher(m1) = m;
-        reset(m1, s as ##java.lang.CharSequence);
+        discard reset(m1, s as ##java.lang.CharSequence);
         ()
 
     ///
     /// Set the bounds of the matcher's region.
     ///
     pub def setBounds!(bounds: {start :: Int32, end :: Int32}, m: Matcher[r]): Result[Unit, String] \ Write(r) =
-        import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher & r as region1;
-        import java.lang.Throwable.getMessage(): String & r;
+        import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher \ r as region1;
+        import java.lang.Throwable.getMessage(): String \ r;
         try {
             let Matcher(m1) = m;
             let _ = region1(m1, bounds.start, bounds.end);
@@ -280,7 +280,7 @@ namespace Text/Regex/Matcher {
     /// Change the pattern used by this matcher.
     ///
     pub def setPattern!(p: Pattern, m: Matcher[r]): Result[Unit, String] \ Write(r) =
-        import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher & r;
+        import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher \ r;
         try {
             let Matcher(m1) = m;
             let _ = usePattern(m1, Text/Regex/Pattern.getPattern(p));
@@ -294,7 +294,7 @@ namespace Text/Regex/Matcher {
     /// Replace all the matches found by this matcher with the string `rep`.
     ///
     pub def replaceAll(rep: String, m: Matcher[r]): String \ Write(r) =
-        import java.util.regex.Matcher.replaceAll(String): String & r;
+        import java.util.regex.Matcher.replaceAll(String): String \ r;
         let Matcher(m1) = m;
         replaceAll(m1, rep)
 
@@ -302,7 +302,7 @@ namespace Text/Regex/Matcher {
     /// Replace the first match found by this matcher with the string `rep`.
     ///
     pub def replaceFirst(rep: String, m: Matcher[r]): String \ Write(r) =
-        import java.util.regex.Matcher.replaceFirst(String): String & r;
+        import java.util.regex.Matcher.replaceFirst(String): String \ r;
         let Matcher(m1) = m;
         replaceFirst(m1, rep)
 
@@ -310,7 +310,7 @@ namespace Text/Regex/Matcher {
     /// Append replacement...
     ///
     pub def appendReplacement!(rep: String, sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Read(r2)} =
-        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher & r1 and r2;
+        import java.util.regex.Matcher.appendReplacement(##java.lang.StringBuilder, String): ##java.util.regex.Matcher \ {r1, r2};
         let Matcher(m1) = m;
         let StringBuilder(sb1) = sb;
         let _ = appendReplacement(m1, sb1, rep);
@@ -320,7 +320,7 @@ namespace Text/Regex/Matcher {
     /// Append tail of matcher to string builder...
     ///
     pub def appendTail!(sb: StringBuilder[r1], m: Matcher[r2]): Unit \ {Write(r1), Read(r2)} =
-        import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder & r1 and r2;
+        import java.util.regex.Matcher.appendTail(##java.lang.StringBuilder): ##java.lang.StringBuilder \ {r1, r2};
         let Matcher(m1) = m;
         let StringBuilder(sb1) = sb;
         let _ = appendTail(m1, sb1);

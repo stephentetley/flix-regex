@@ -56,8 +56,8 @@ namespace Text/Regex/MatchResult {
     /// Return the start position of the match result
     ///
     pub def start(m: MatchResult): Result[Int32, String] =
-        import java.util.regex.MatchResult.start(): Int32 & Pure;
-        import java.lang.Throwable.getMessage(): String & Pure;
+        import java.util.regex.MatchResult.start(): Int32 \ {};
+        import java.lang.Throwable.getMessage(): String \ {};
         try {
             getMatchResult(m) |> Result.map(start)
         } catch {
@@ -68,8 +68,8 @@ namespace Text/Regex/MatchResult {
     /// Return the end position of the match result
     ///
     pub def end(m: MatchResult): Result[Int32, String] =
-        import java.util.regex.MatchResult.end(): Int32 & Pure;
-        import java.lang.Throwable.getMessage(): String & Pure;
+        import java.util.regex.MatchResult.end(): Int32 \ {};
+        import java.lang.Throwable.getMessage(): String \ {};
         try {
             getMatchResult(m) |> Result.map(end)
         } catch {
@@ -89,8 +89,8 @@ namespace Text/Regex/MatchResult {
     /// Return all of the text of the match result
     ///
     pub def content(m: MatchResult): Result[String, String] =
-        import java.util.regex.MatchResult.group(): String & Pure;
-        import java.lang.Throwable.getMessage(): String & Pure;
+        import java.util.regex.MatchResult.group(): String \ {};
+        import java.lang.Throwable.getMessage(): String \ {};
         try {
             getMatchResult(m) |> Result.map(group)
         } catch {
@@ -103,8 +103,8 @@ namespace Text/Regex/MatchResult {
     /// 0 indexed.
     ///
     pub def groupAt(i: Int32, m: MatchResult): Result[String, String] =
-        import java.util.regex.MatchResult.group(Int32): String & Pure;
-        import java.lang.Throwable.getMessage(): String & Pure;
+        import java.util.regex.MatchResult.group(Int32): String \ {};
+        import java.lang.Throwable.getMessage(): String \ {};
         try {
             getMatchResult(m) |> Result.map(m1 -> group(m1, i+1))
         } catch {
@@ -115,12 +115,12 @@ namespace Text/Regex/MatchResult {
     /// Return the number of capturing groups in the pattern used by the match result.
     ///
     pub def groupCount(m: MatchResult): Result[Int32, String] =
-        import java.util.regex.MatchResult.groupCount(): Int32 & Pure;
+        import java.util.regex.MatchResult.groupCount(): Int32 \ {};
         try {
             getMatchResult(m) |> Result.map(groupCount)
         } catch {
             case ex: ##java.lang.Exception => 
-                import java.lang.Throwable.getMessage(): String & Pure;
+                import java.lang.Throwable.getMessage(): String \ {};
                 Err("groupAt: ${getMessage(ex)}")
         }
 
