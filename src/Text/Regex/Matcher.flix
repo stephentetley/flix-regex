@@ -133,7 +133,7 @@ namespace Text/Regex/Matcher {
             case ex: ##java.lang.Exception => Err("end: ${getMessage(ex)}")
         }
 
-    pub def range(m: Matcher[r]): Result[{start :: Int32, end :: Int32}, String] \ Read(r) =
+    pub def range(m: Matcher[r]): Result[{start = Int32, end = Int32}, String] \ Read(r) =
         use Result.flatMap;
         let* s = start(m);
         let* e = end(m);
@@ -265,12 +265,12 @@ namespace Text/Regex/Matcher {
     ///
     /// Set the bounds of the matcher's region.
     ///
-    pub def setBounds!(bounds: {start :: Int32, end :: Int32}, m: Matcher[r]): Result[Unit, String] \ Write(r) =
+    pub def setBounds!(start: {start = Int32}, end: {end = Int32}, m: Matcher[r]): Result[Unit, String] \ Write(r) =
         import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher \ r as region1;
         import java.lang.Throwable.getMessage(): String \ r;
         try {
             let Matcher(m1) = m;
-            let _ = region1(m1, bounds.start, bounds.end);
+            let _ = region1(m1, start.start, end.end);
             Ok()
         } catch {
             case ex: ##java.lang.Exception => Err("setBounds!: ${getMessage(ex)}")

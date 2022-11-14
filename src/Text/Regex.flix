@@ -175,11 +175,11 @@ namespace Text/Regex {
     ///
     /// Match input `s` with pattern `p`, must match the whole of the bounded region...
     ///
-    pub def isBoundedMatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+    pub def isBoundedMatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
         use Text/Regex/Matcher.{newMatcher, setBounds!, matches};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(_) => false
                 case Ok()   => matches(m)
             }
@@ -188,11 +188,11 @@ namespace Text/Regex {
     ///
     /// Match input within region
     ///
-    pub def isBoundedSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+    pub def isBoundedSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
         use Text/Regex/Matcher.{newMatcher, setBounds!, find!};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(_) => false
                 case Ok()   => find!(m)
             }
@@ -201,11 +201,11 @@ namespace Text/Regex {
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Bool =
+    pub def boundedStartsWith(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
         use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(_) => false
                 case Ok()   => lookingAt(m)
             }
@@ -215,11 +215,11 @@ namespace Text/Regex {
 
     ///
     ///
-    pub def boundedMatchAll(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
+    pub def boundedMatchAll(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, matches, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(msg) => Text/Regex/MatchResult.throwError(msg)
                 case Ok()     =>
                     if (matches(m)) 
@@ -230,14 +230,14 @@ namespace Text/Regex {
         }
 
 
-    pub def boundedMatchAllContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        boundedMatchAll(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedMatchAllContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
+        boundedMatchAll(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
-    pub def boundedFirstSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
+    pub def boundedFirstSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, find!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(msg) => Text/Regex/MatchResult.throwError(msg)
                 case Ok()     =>
                     if (find!(m)) 
@@ -247,14 +247,14 @@ namespace Text/Regex {
             }
         }
 
-    pub def boundedFirstSubmatchContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        boundedFirstSubmatch(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedFirstSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
+        boundedFirstSubmatch(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
-    pub def boundedLastSubmatch(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
+    pub def boundedLastSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, findLast!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(msg) => Text/Regex/MatchResult.throwError(msg)
                 case Ok()   =>
                     if (findLast!(m)) 
@@ -264,14 +264,14 @@ namespace Text/Regex {
             }
         }
 
-    pub def boundedLastSubmatchContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        boundedLastSubmatch(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedLastSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
+        boundedLastSubmatch(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
-    pub def boundedMatchPrefix(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): MatchResult =
+    pub def boundedMatchPrefix(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
         use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, matchResult};
         region r {
             let m = newMatcher(r, p, s);
-            match setBounds!(bounds, m) {
+            match setBounds!(start, end, m) {
                 case Err(msg) => Text/Regex/MatchResult.throwError(msg)
                 case Ok()   =>
                     if (lookingAt(m)) 
@@ -281,8 +281,8 @@ namespace Text/Regex {
             }
         }
 
-    pub def boundedMatchPrefixContent(bounds: {start :: Int32, end :: Int32}, p: Pattern, s: String): Option[String] =
-        boundedMatchPrefix(bounds, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedMatchPrefixContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
+        boundedMatchPrefix(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
 
 
     // # Multiple results
@@ -347,8 +347,8 @@ namespace Text/Regex {
     ///
     /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
     ///
-    pub def boundedSplit(bounds: {start :: Int32, end :: Int32}, patt: Pattern, input: String): List[String] =
-        let input1 = String.slice(bounds.start, bounds.end, input);
+    pub def boundedSplit(start: {start = Int32}, end: {end = Int32}, patt: Pattern, input: String): List[String] =
+        let input1 = String.slice(start.start, end.end, input);
         split(patt, input1)
 
 
@@ -429,20 +429,20 @@ namespace Text/Regex {
     // Replace
 
     ///
-    /// Returns string `s` with every match of the pattern `from` replaced by the string `to`.
+    /// Returns string `s` with every match of the pattern `patt` replaced by the string `to`.
     ///
-    pub def replace(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+    pub def replace(patt: {patt = Pattern}, to: {to = String}, s: String): String =
         region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            let m1 = Text/Regex/Matcher.newMatcher(r, patt.patt, s);
             Text/Regex/Matcher.replaceAll(to.to, m1)
         }
 
     ///
     /// Returns string `s` with the first match of the regular expression `patt` replaced by the string `rep`.
     ///
-    pub def replaceFirstMatch(from: {from :: Pattern}, to: {to :: String}, s: String): String =
+    pub def replaceFirstMatch(patt: {patt = Pattern}, to: {to = String}, s: String): String =
         region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, from.from, s);
+            let m1 = Text/Regex/Matcher.newMatcher(r, patt.patt, s);
             Text/Regex/Matcher.replaceFirst(to.to, m1)
         }
 

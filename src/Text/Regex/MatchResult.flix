@@ -79,7 +79,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return the start and end positions of the match result
     ///
-    pub def range(m: MatchResult): Result[{start :: Int32, end :: Int32}, String] =
+    pub def range(m: MatchResult): Result[{start = Int32, end = Int32}, String] =
         use Result.flatMap;
         let* s = start(m);
         let* e = end(m);
