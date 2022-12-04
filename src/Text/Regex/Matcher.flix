@@ -28,7 +28,7 @@ namespace Text/Regex {
     // No New instance - matcher must be created from pattern and input
 
     instance Scoped[Matcher] {
-        pub def regionOf(_: Matcher[r]): Region[r] = () as Region[r]
+        pub def regionOf(_: Matcher[r]): Region[r] = unsafe_cast () as Region[r]
     }
 
 }
@@ -54,7 +54,7 @@ namespace Text/Regex/Matcher {
     pub def newMatcher(_: Region[r], p: Pattern, s: String): Matcher[r] \ Write(r) =
         import java.util.regex.Pattern.matcher(##java.lang.CharSequence): ##java.util.regex.Matcher \ r;
         let Pattern(p1) = p;
-        Matcher(matcher(p1, s as ##java.lang.CharSequence))
+        Matcher(matcher(p1, unsafe_cast s as ##java.lang.CharSequence))
 
 
 
@@ -259,7 +259,7 @@ namespace Text/Regex/Matcher {
     pub def resetInput!(s: String, m: Matcher[r]): Unit \ Write(r) =
         import java.util.regex.Matcher.reset(##java.lang.CharSequence): ##java.util.regex.Matcher \ r;
         let Matcher(m1) = m;
-        discard reset(m1, s as ##java.lang.CharSequence);
+        discard reset(m1, unsafe_cast s as ##java.lang.CharSequence);
         ()
 
     ///

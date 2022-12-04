@@ -337,7 +337,7 @@ namespace Text/Regex {
         import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String, r] \ Write(r);
         let _ = r; // This avoids a redundancy error.
         let p1 = Text/Regex/Pattern.getPattern(p);
-        let arr = split(p1, s as ##java.lang.CharSequence);
+        let arr = split(p1, unsafe_cast s as ##java.lang.CharSequence);
         arr |> Array.toList
     }
         
