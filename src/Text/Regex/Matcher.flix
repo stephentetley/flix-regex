@@ -27,9 +27,6 @@ namespace Text/Regex {
     
     // No New instance - matcher must be created from pattern and input
 
-    instance Scoped[Matcher] {
-        pub def regionOf(_: Matcher[r]): Region[r] = unsafe_cast () as Region[r]
-    }
 
 }
 
@@ -111,7 +108,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Return the start position of the string matched by the preceeding `find`
     ///
-    pub def start(m: Matcher[r]): Result[Int32, String] \ Read(r) =
+    pub def start(m: Matcher[r]): Result[String, Int32] \ Read(r) =
         import java.util.regex.Matcher.start(): Int32 \ r;
         import java.lang.Throwable.getMessage(): String \ r;
         try {
@@ -124,7 +121,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Return the end position of the string matched by the preceeding `find`
     ///
-    pub def end(m: Matcher[r]): Result[Int32, String] \ Read(r) =
+    pub def end(m: Matcher[r]): Result[String, Int32] \ Read(r) =
         import java.util.regex.Matcher.end(): Int32 \ r;
         import java.lang.Throwable.getMessage(): String \ r;
         try {
@@ -133,7 +130,7 @@ namespace Text/Regex/Matcher {
             case ex: ##java.lang.Exception => Err("end: ${getMessage(ex)}")
         }
 
-    pub def range(m: Matcher[r]): Result[{start = Int32, end = Int32}, String] \ Read(r) =
+    pub def range(m: Matcher[r]): Result[String, {start = Int32, end = Int32}] \ Read(r) =
         use Result.flatMap;
         let* s = start(m);
         let* e = end(m);
@@ -148,7 +145,7 @@ namespace Text/Regex/Matcher {
             }
         }
         
-    def findLastHelper(lastPos: Int32, m: Matcher[r]): Result[Int32, String] \ Write(r) =
+    def findLastHelper(lastPos: Int32, m: Matcher[r]): Result[String, Int32] \ Write(r) =
         let more = find!(m);
         if (more)
             Result.flatMap(pos -> findLastHelper(pos, m), start(m))
@@ -163,7 +160,7 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Write(r) =
+    pub def findFrom!(pos: Int32, m: Matcher[r]): Result[String, Bool] \ Write(r) =
         import java.util.regex.Matcher.find(Int32): Bool \ r;
         import java.lang.Throwable.getMessage(): String \ r;
         try {
@@ -178,7 +175,7 @@ namespace Text/Regex/Matcher {
     ///
     /// The internal state of the matcher is updated.
     ///
-    pub def findStartFrom!(pos: Int32, m: Matcher[r]): Result[Option[Int32], String] \ Write(r) = 
+    pub def findStartFrom!(pos: Int32, m: Matcher[r]): Result[String, Option[Int32]] \ Write(r) = 
         match findFrom!(pos, m) {
             case Err(msg)  => Err(msg)
             case Ok(true)  => start(m) |> Result.map(Some)
@@ -186,7 +183,7 @@ namespace Text/Regex/Matcher {
         }
 
 
-    pub def findLastFrom!(pos: Int32, m: Matcher[r]): Result[Bool, String] \ Write(r) =
+    pub def findLastFrom!(pos: Int32, m: Matcher[r]): Result[String, Bool] \ Write(r) =
         let step = x -> match x {
             case None         => Ok(false)
             case Some(first)  => match findLastHelper(first, m) {
@@ -265,7 +262,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Set the bounds of the matcher's region.
     ///
-    pub def setBounds!(start: {start = Int32}, end: {end = Int32}, m: Matcher[r]): Result[Unit, String] \ Write(r) =
+    pub def setBounds!(start: {start = Int32}, end: {end = Int32}, m: Matcher[r]): Result[String, Unit] \ Write(r) =
         import java.util.regex.Matcher.region(Int32, Int32): ##java.util.regex.Matcher \ r as region1;
         import java.lang.Throwable.getMessage(): String \ r;
         try {
@@ -279,7 +276,7 @@ namespace Text/Regex/Matcher {
     ///
     /// Change the pattern used by this matcher.
     ///
-    pub def setPattern!(p: Pattern, m: Matcher[r]): Result[Unit, String] \ Write(r) =
+    pub def setPattern!(p: Pattern, m: Matcher[r]): Result[String, Unit] \ Write(r) =
         import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher \ r;
         try {
             let Matcher(m1) = m;

@@ -25,7 +25,7 @@ namespace Text/Regex {
     ///
     /// Represents a MatchResult.
     ///
-    pub enum MatchResult(Result[##java.util.regex.MatchResult, String])
+    pub enum MatchResult(Result[String, ##java.util.regex.MatchResult])
 
 
 }
@@ -35,7 +35,7 @@ namespace Text/Regex/MatchResult {
     use Text/Regex.MatchResult;
     use Text/Regex.MatchResult.{MatchResult};
 
-    def getMatchResult(m: MatchResult): Result[##java.util.regex.MatchResult, String] = 
+    def getMatchResult(m: MatchResult): Result[String, ##java.util.regex.MatchResult] = 
         let MatchResult(m1) = m;
         m1
 
@@ -55,7 +55,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return the start position of the match result
     ///
-    pub def start(m: MatchResult): Result[Int32, String] =
+    pub def start(m: MatchResult): Result[String, Int32] =
         import java.util.regex.MatchResult.start(): Int32 \ {};
         import java.lang.Throwable.getMessage(): String \ {};
         try {
@@ -67,7 +67,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return the end position of the match result
     ///
-    pub def end(m: MatchResult): Result[Int32, String] =
+    pub def end(m: MatchResult): Result[String, Int32] =
         import java.util.regex.MatchResult.end(): Int32 \ {};
         import java.lang.Throwable.getMessage(): String \ {};
         try {
@@ -79,7 +79,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return the start and end positions of the match result
     ///
-    pub def range(m: MatchResult): Result[{start = Int32, end = Int32}, String] =
+    pub def range(m: MatchResult): Result[String, {start = Int32, end = Int32}] =
         use Result.flatMap;
         let* s = start(m);
         let* e = end(m);
@@ -114,7 +114,7 @@ namespace Text/Regex/MatchResult {
     ///
     /// Return the number of capturing groups in the pattern used by the match result.
     ///
-    pub def groupCount(m: MatchResult): Result[Int32, String] =
+    pub def groupCount(m: MatchResult): Result[String, Int32] =
         import java.util.regex.MatchResult.groupCount(): Int32 \ {};
         try {
             getMatchResult(m) |> Result.map(groupCount)

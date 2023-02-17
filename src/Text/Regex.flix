@@ -348,7 +348,7 @@ namespace Text/Regex {
     /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
     ///
     pub def boundedSplit(start: {start = Int32}, end: {end = Int32}, patt: Pattern, input: String): List[String] =
-        let input1 = String.slice(start.start, end.end, input);
+        let input1 = String.slice(start, end, input);
         split(patt, input1)
 
 
@@ -376,13 +376,13 @@ namespace Text/Regex {
     pub def breakOnLeft(p: Pattern, s: String): (String, String) =
         match firstSubmatch(p, s) |> Text/Regex/MatchResult.range {
             case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
+            case Ok(r)  => (String.sliceLeft(end = r.start, s), String.sliceRight(start = r.start, s))
         }
 
     pub def breakAfterLeft(p: Pattern, s: String): (String, String) =
         match firstSubmatch(p, s) |> Text/Regex/MatchResult.range {
             case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
+            case Ok(r)  => (String.sliceLeft(end = r.end, s), String.sliceRight(start = r.end, s))
         }
 
 
@@ -393,7 +393,7 @@ namespace Text/Regex {
     pub def breakOnRight(p: Pattern, s: String): (String, String) =
         match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
             case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(r.end, s), String.sliceRight(r.end, s))
+            case Ok(r)  => (String.sliceLeft(end = r.end, s), String.sliceRight(start = r.end, s))
         }
 
     ///
@@ -403,7 +403,7 @@ namespace Text/Regex {
     pub def breakBeforeRight(p: Pattern, s: String): (String, String) =
         match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
             case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(r.start, s), String.sliceRight(r.start, s))
+            case Ok(r)  => (String.sliceLeft(end = r.start, s), String.sliceRight(start = r.start, s))
         }
 
 

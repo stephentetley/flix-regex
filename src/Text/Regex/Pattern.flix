@@ -113,7 +113,7 @@ namespace Text/Regex/Pattern {
     ///
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
-    pub def compile(regex: String): Result[Pattern, String] =
+    pub def compile(regex: String): Result[String, Pattern] =
         import static java.util.regex.Pattern.compile(String): ##java.util.regex.Pattern \ {};
         try {
             Ok(Pattern(compile(regex)))
@@ -128,7 +128,7 @@ namespace Text/Regex/Pattern {
     ///
     /// Returns `Err` if the regex is ill-formed and cannot be compiled.
     ///
-    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[Pattern, String] =
+    pub def compileWithFlags(regex: String, flags: List[Flag]): Result[String, Pattern] =
         import static java.util.regex.Pattern.compile(String, Int32): ##java.util.regex.Pattern \ {};
         try {
             Ok(Pattern(compile(regex, sumFlags(flags))))
@@ -187,7 +187,7 @@ namespace Text/Regex/Pattern {
     ///
     /// Recompile the pattern `patt`, modifying its source regex with the function `f`.
     ///
-    pub def modifyRegex(f: String -> String, patt: Pattern): Result[Pattern, String] =
+    pub def modifyRegex(f: String -> String, patt: Pattern): Result[String, Pattern] =
         let flags = getFlags(patt);
         let src = getRegex(patt);
         compileWithFlags(f(src), Multiline :: flags)
