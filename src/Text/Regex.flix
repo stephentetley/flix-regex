@@ -450,9 +450,9 @@ namespace Text/Regex {
 
     pub def rewriteAll(f: String -> String, p: Pattern, s: String): String =
         use Text/Regex/Matcher.{newMatcher};
-        region r {
-            let m = newMatcher(r, p, s);
-            let sb = new StringBuilder(r);
+        region rc {
+            let m = newMatcher(rc, p, s);
+            let sb = StringBuilder.new(rc);
             rewriteAllHelper(f, sb, m);
             StringBuilder.toString(sb)
         }
@@ -471,9 +471,9 @@ namespace Text/Regex {
 
     pub def rewriteSome(f: String -> Option[String], p: Pattern, s: String): String =
         use Text/Regex/Matcher.{newMatcher};
-        region r {
-            let m = newMatcher(r, p, s);
-            let sb = new StringBuilder(r);
+        region rc {
+            let m = newMatcher(rc, p, s);
+            let sb = StringBuilder.new(rc);
             rewriteSomeHelper(f, sb, m);
             StringBuilder.toString(sb)
         }
@@ -494,9 +494,9 @@ namespace Text/Regex {
 
     pub def rewriteAllWithIndex(f: (Int32, String) -> String, p: Pattern, s: String): String =
         use Text/Regex/Matcher.{newMatcher};
-        region r {
-            let m = newMatcher(r, p, s);
-            let sb = new StringBuilder(r);
+        region rc {
+            let m = newMatcher(rc, p, s);
+            let sb = StringBuilder.new(rc);
             rewriteAllWithIndexHelper(f, 0, sb, m);
             StringBuilder.toString(sb)
         }
@@ -515,9 +515,9 @@ namespace Text/Regex {
 
     pub def rewriteSomeWithIndex(f: (Int32, String) -> Option[String], p: Pattern, s: String): String =
         use Text/Regex/Matcher.{newMatcher};
-        region r {
-            let m = newMatcher(r, p, s);
-            let sb = new StringBuilder(r);
+        region rc {
+            let m = newMatcher(rc, p, s);
+            let sb = StringBuilder.new(rc);
             rewriteSomeWithIndexHelper(f, 0, sb, m);
             StringBuilder.toString(sb)
         }
@@ -542,9 +542,9 @@ namespace Text/Regex {
         if (ntimes <= 0 )
             s
         else 
-            region r {
-                let m = newMatcher(r, p, s);
-                let sb = new StringBuilder(r);
+            region rc {
+                let m = newMatcher(rc, p, s);
+                let sb = StringBuilder.new(rc);
                 rewriteFirstNHelper(ntimes, f, 0, sb, m);
                 StringBuilder.toString(sb)
             }
