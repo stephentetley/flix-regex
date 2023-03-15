@@ -20,6 +20,9 @@
 
 namespace Text/Regex {
 
+    use Text/Regex.Pattern
+    use Text/Regex.Pattern.{Pattern}
+    
     ///
     /// Represents a compiled Pattern.
     /// Immutable
@@ -53,18 +56,23 @@ namespace Text/Regex {
 
 namespace Text/Regex/Pattern {
 
-    use Text/Regex.Pattern;
-    use Text/Regex.Pattern.{Pattern};
+    use Text/Regex.Pattern
+    use Text/Regex.Pattern.{Pattern}
+    // use Text/Regex/Pattern.Flag
+    use Text/Regex/Pattern.Flag.{CanonEq, CaseInsenstive,
+        Comments, Dotall, Literal, Multiline,
+        UnicodeCase, UnicodeCharacterClass, UnixLines
+    }
 
     pub enum Flag with Eq, Order, ToString {
-        case CanonEq,
-        case CaseInsenstive,
-        case Comments,
-        case Dotall,
-        case Literal,
-        case Multiline,
-        case UnicodeCase,
-        case UnicodeCharacterClass,
+        case CanonEq
+        case CaseInsenstive
+        case Comments
+        case Dotall
+        case Literal
+        case Multiline
+        case UnicodeCase
+        case UnicodeCharacterClass
         case UnixLines
     }
 

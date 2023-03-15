@@ -40,6 +40,7 @@ namespace Text/Regex/Matcher {
     use Text/Regex.MatchResult.{MatchResult};
     use Text/Regex.Pattern;
     use Text/Regex.Pattern.{Pattern};
+    use StringBuilder.{StringBuilder};
 
     def getMatcher(m: Matcher[r]): ##java.util.regex.Matcher = 
         let Matcher(m1) = m;
