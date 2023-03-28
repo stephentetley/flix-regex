@@ -145,7 +145,8 @@ namespace Text/Regex/Matcher {
                 case Ok(end) => Result.getWithDefault(false, findFrom!(end - 1, m))
             }
         }
-        
+
+    /// Returns start position of last match.
     def findLastHelper(lastPos: Int32, m: Matcher[r]): Result[String, Int32] \ Write(r) =
         let more = find!(m);
         if (more)
