@@ -132,10 +132,9 @@ namespace Text/Regex/Matcher {
         }
 
     pub def range(m: Matcher[r]): Result[String, {start = Int32, end = Int32}] \ Read(r) =
-        use Result.flatMap;
-        let* s = start(m);
-        let* e = end(m);
-        Ok({start = s, end = e})
+        forM (s <- start(m);
+                e <- end(m))
+        yield {start = s, end = e}
 
     pub def findLast!(m: Matcher[r]): Bool \ Write(r) =
         match findStart!(m) {

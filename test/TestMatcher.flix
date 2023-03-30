@@ -40,11 +40,7 @@ namespace TestMatcher {
     @test
     def getMatch02(): Bool & Impure =
         use Text/Regex/Matcher.{runsMatcher, flatMap, point, getMatch};
-        let p1 = {
-            let* _ = getMatch();
-            let* b = getMatch();
-            point(b)
-        };
+        let p1 = forM (_ <- getMatch(); b <- getMatch()) yield b;
         runsMatcher(p1, "\\w+", "aa bb") == Ok("bb")
 
     /////////////////////////////////////////////////////////////////////////////

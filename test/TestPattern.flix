@@ -23,10 +23,9 @@ namespace TestPattern {
 
     @test
     def toString01(): Result[String, String] =
-        use Result.flatMap;
+        use Functor.{<$$>};
         let step = () -> {
-            let* p1 = Text/Regex/Pattern.compile("\\s+");
-            Ok(ToString.toString(p1))
+            Text/Regex/Pattern.compile("\\s+") <$$> ToString.toString
         };
         step()
 
@@ -36,10 +35,9 @@ namespace TestPattern {
 
     @test
     def getRegex01(): Bool =
-        use Result.flatMap;
+        use Functor.{<$$>};
         let step = () -> {
-            let* p1 = Text/Regex/Pattern.compile("\\s+");
-            Ok(Text/Regex/Pattern.getRegex(p1))
+            Text/Regex/Pattern.compile("\\s+") <$$> Text/Regex/Pattern.getRegex
         };
         step() == Ok("\\s+")
 
@@ -49,30 +47,27 @@ namespace TestPattern {
 
     @test
     def getFlags01(): Bool =
-        use Result.flatMap;
+        use Functor.{<$$>};
         let step = () -> {
-            let* p1 = Text/Regex/Pattern.compile("\\s+");
-            Ok(Text/Regex/Pattern.getFlags(p1))
+            Text/Regex/Pattern.compile("\\s+") <$$> Text/Regex/Pattern.getFlags
         };
         step() == Ok(Nil)
 
     @test
     def getFlags02(): Bool =
-        use Result.flatMap;
+        use Functor.{<$$>};
         use Text/Regex/Pattern.Flag.{CanonEq};
         let step = () -> {
-            let* p1 = Text/Regex/Pattern.compileWithFlags("\\s+", CanonEq :: Nil);
-            Ok(Text/Regex/Pattern.getFlags(p1))
+            Text/Regex/Pattern.compileWithFlags("\\s+", CanonEq :: Nil) <$$> Text/Regex/Pattern.getFlags
         };
         step() == Ok(CanonEq :: Nil)
 
     @test
     def getFlags03(): Bool =
-        use Result.flatMap;
+        use Functor.{<$$>};
         use Text/Regex/Pattern.Flag.{CanonEq, Multiline};
         let step = () -> {
-            let* p1 = Text/Regex/Pattern.compileWithFlags("\\s+", CanonEq ::  Multiline :: Nil);
-            Ok(Text/Regex/Pattern.getFlags(p1))
+            Text/Regex/Pattern.compileWithFlags("\\s+", CanonEq ::  Multiline :: Nil) <$$> Text/Regex/Pattern.getFlags
         };
         step() == Ok(CanonEq :: Multiline :: Nil) or step() == Ok(Multiline :: CanonEq :: Nil)
 

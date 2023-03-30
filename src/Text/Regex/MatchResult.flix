@@ -80,10 +80,9 @@ namespace Text/Regex/MatchResult {
     /// Return the start and end positions of the match result
     ///
     pub def range(m: MatchResult): Result[String, {start = Int32, end = Int32}] =
-        use Result.flatMap;
-        let* s = start(m);
-        let* e = end(m);
-        Ok({start = s, end = e})
+        forM (s <- start(m);
+                e <- end(m))
+        yield {start = s, end = e}
 
     ///
     /// Return all of the text of the match result
