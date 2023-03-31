@@ -21,44 +21,13 @@ namespace TestRegex {
     // isMatch                                                                 //
     /////////////////////////////////////////////////////////////////////////////
 
-    @test
-    def isMatch01(): Bool =
-        use Functor.{<$$>};
-        let step = () -> {
-            Text/Regex/Pattern.compile(".*") <$$> flip(Text/Regex.isMatch, "")
-        };
-        step() == Ok(true)
+    // @test
+    // def isMatch01(): Bool =
+    //     use Functor.{<$$>};
+    //     let step = () -> {
+    //         Text/Regex/Pattern.compile(".*") <$$> flip(Text/Regex.isMatch, "")
+    //     };
+    //     step() == Ok(true)
 
-    @test
-    def isMatch02(): Bool =
-        use Functor.{<$$>};
-        let step = () -> {
-            Text/Regex/Pattern.compile(".*") <$$> flip(Text/Regex.isMatch, "a")
-        };
-        step() == Ok(true)
-
-    @test
-    def isMatch03(): Bool =
-        use Functor.{<$$>};
-        let step = () -> {
-            Text/Regex/Pattern.compile(".+") <$$> flip(Text/Regex.isMatch, "")
-        };
-        step() == Ok(false)
-
-    @test
-    def isMatch04(): Bool =
-        use Functor.{<$$>};
-        let step = () -> {
-            Text/Regex/Pattern.compile("\\d+") <$$> flip(Text/Regex.isMatch, "aaa")
-        };
-        step() == Ok(false)
-
-    @test
-    def isMatch05(): Bool =
-        use Functor.{<$$>};
-        let step = () -> {
-            Text/Regex/Pattern.compile("\\d+") <$$> flip(Text/Regex.isMatch, "1234a")
-        };
-        step() == Ok(false)
 
 }

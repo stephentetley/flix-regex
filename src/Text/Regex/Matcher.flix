@@ -38,8 +38,8 @@ namespace Text/Regex/Matcher {
 
     use Text/Regex.MatchResult;
     use Text/Regex.MatchResult.{MatchResult};
-    use Text/Regex.Pattern;
-    use Text/Regex.Pattern.{Pattern};
+    use Regex.Pattern;
+    use Regex.Pattern.{Pattern};
     use StringBuilder.{StringBuilder};
 
     def getMatcher(m: Matcher[r]): ##java.util.regex.Matcher = 
@@ -281,7 +281,8 @@ namespace Text/Regex/Matcher {
         import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher \ r;
         try {
             let Matcher(m1) = m;
-            let _ = usePattern(m1, Text/Regex/Pattern.getPattern(p));
+            let Pattern(p1) = p;
+            let _ = usePattern(m1, p1);
             Ok()
         } catch {
             case _: ##java.lang.Exception => Err("usePattern!")

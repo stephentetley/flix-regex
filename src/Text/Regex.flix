@@ -16,53 +16,8 @@
 
 namespace Text/Regex {
 
-    use Text/Regex.Pattern;
-    use Text/Regex.Pattern.Pattern;
-
-
-    // # Predicates
-    // Names follow `String.flix`
-
-    ///
-    /// Returns `true` if the entire string `s` is matched by the pattern `patt`.
-    ///
-    pub def isMatch(p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, matches};
-        region r {
-            newMatcher(r, p, s) |> matches
-        }
-
-
-    ///
-    /// Returns `true` if the string `input` is matched by the regular expression pattern `p`
-    /// at any position within the string `s`.
-    ///
-    pub def isSubmatch(p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, find!};
-        region r {
-            newMatcher(r, p, s) |> find!
-        }
-
-    ///
-    /// Returns `true` if the string `s` starts the regular expression pattern `p`.
-    ///
-    pub def startsWith(p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, lookingAt};
-        region r {
-            newMatcher(r, p, s) |> lookingAt
-        }
-
-    ///
-    /// Returns `true` if the string `input` ends the regular expression pattern `patt`.
-    ///
-    /// This will be slower than `startsWith` because there is no primitive Java function
-    /// to call, instead the matches of `patt` are iterated until the last one is found.
-    ///
-    pub def endsWith(p: Pattern, s: String): Bool =
-        match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_)  => false
-            case Ok(rng) => String.length(s) - 1 == rng.end
-        }
+    use Regex.Pattern;
+    use Regex.Pattern.Pattern;
 
 
     // # Matchers
@@ -310,36 +265,7 @@ namespace Text/Regex {
 
 
 
-    // # String API functions using regexes
 
-    ///
-    /// Count the occurences of `patt` in string `s`.
-    ///
-    pub def countSubmatches(p: Pattern, s: String): Int32 =
-        use Text/Regex/Matcher.{newMatcher};
-        region r {
-            let m = newMatcher(r, p, s);
-            countMatcher(0, m)
-        }
-
-    def countMatcher(acc: Int32, m: Matcher[r]): Int32 \ Read(r) =
-        use Text/Regex/Matcher.{find!};
-        if (find!(m))
-            countMatcher(acc+1, m) 
-        else 
-            acc
-
-
-    ///
-    /// Splits the string `s` around matches of the pattern `p`.
-    ///
-    pub def split(p: Pattern, s: String): List[String] = region r {
-        import java.util.regex.Pattern.split(##java.lang.CharSequence): Array[String, r] \ Write(r);
-        let _ = r; // This avoids a redundancy error.
-        let p1 = Text/Regex/Pattern.getPattern(p);
-        let arr = split(p1, unchecked_cast(s as ##java.lang.CharSequence));
-        arr |> Array.toList
-    }
         
     /// TODO split - Iterator / stream version...
 
@@ -349,102 +275,10 @@ namespace Text/Regex {
     ///
     pub def boundedSplit(start: {start = Int32}, end: {end = Int32}, patt: Pattern, input: String): List[String] =
         let input1 = String.slice(start, end, input);
-        split(patt, input1)
-
-
-    ///
-    /// Return the index of the first occurence of `patt` in `s` from the left.
-    ///
-    /// If `patt` is not present in `s` return None.
-    ///
-    /// If `patt` is the empty string return None.
-    ///
-    pub def indexOfLeft(p: Pattern, s: String): Option[Int32] =
-        firstSubmatch(p, s) |> Text/Regex/MatchResult.start |> Result.toOption
-
-    ///
-    /// Find index of rightmost match.
-    ///
-    pub def indexOfRight(p: Pattern, s: String): Option[Int32] =
-        lastSubmatch(p, s) |> Text/Regex/MatchResult.start |> Result.toOption
-
-
-    ///
-    /// Find the first instance of `patt` in string `s`, return a pair of the
-    /// prefix of string `s` up to `sub` and the rest of string `s` including `sub`.
-    ///
-    pub def breakOnLeft(p: Pattern, s: String): (String, String) =
-        match firstSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(end = r.start, s), String.sliceRight(start = r.start, s))
-        }
-
-    pub def breakAfterLeft(p: Pattern, s: String): (String, String) =
-        match firstSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(end = r.end, s), String.sliceRight(start = r.end, s))
-        }
-
-
-    ///
-    /// Find the last instance of `substr` in string `s`, return a pair of the
-    /// initial string including `substr` and suffix from `substr`.
-    ///
-    pub def breakOnRight(p: Pattern, s: String): (String, String) =
-        match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(end = r.end, s), String.sliceRight(start = r.end, s))
-        }
-
-    ///
-    /// Find the last instance of `substr` in string `s`, return a pair of the
-    /// initial string including `substr` and suffix from `substr`.
-    ///
-    pub def breakBeforeRight(p: Pattern, s: String): (String, String) =
-        match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => (s, "")
-            case Ok(r)  => (String.sliceLeft(end = r.start, s), String.sliceRight(start = r.start, s))
-        }
+        Regex.split(pattern = patt, input1)
 
 
 
-    ///
-    /// Returns `Some(suffix)` of string `s` if its prefix matches `patt`.
-    ///
-    pub def stripPrefix(p: Pattern, s: String): Option[String] =
-        match matchPrefix(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => None
-            case Ok(r)  => Some(String.takeRight(r.end, s))
-        }
-
-
-
-    // stripSuffix
-    pub def stripSuffix(p: Pattern, s: String): Option[String] =
-        match lastSubmatch(p, s) |> Text/Regex/MatchResult.range {
-            case Err(_) => None
-            case Ok(r)  => if (r.end == String.length(s) - 1) Some(String.takeLeft(r.start, s)) else None
-        }
-
-    // Replace
-
-    ///
-    /// Returns string `s` with every match of the pattern `patt` replaced by the string `to`.
-    ///
-    pub def replace(patt: {patt = Pattern}, to: {to = String}, s: String): String =
-        region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, patt.patt, s);
-            Text/Regex/Matcher.replaceAll(to.to, m1)
-        }
-
-    ///
-    /// Returns string `s` with the first match of the regular expression `patt` replaced by the string `rep`.
-    ///
-    pub def replaceFirstMatch(patt: {patt = Pattern}, to: {to = String}, s: String): String =
-        region r {
-            let m1 = Text/Regex/Matcher.newMatcher(r, patt.patt, s);
-            Text/Regex/Matcher.replaceFirst(to.to, m1)
-        }
 
     /// Rewrite Strategies
 
