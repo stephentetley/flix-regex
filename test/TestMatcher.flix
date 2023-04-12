@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace TestMatcher {
+mod TestMatcher {
 
 /*
 
@@ -24,7 +24,7 @@ namespace TestMatcher {
 
     @test
     def point01(): Bool & Impure =
-        use Text/Regex/Matcher.{runsMatcher, point};
+        use Text.Regex.Matcher.{runsMatcher, point};
         runsMatcher(point(3), ".*", "aaaaa") == Ok(3)
 
     /////////////////////////////////////////////////////////////////////////////
@@ -33,13 +33,13 @@ namespace TestMatcher {
 
     @test
     def getMatch01(): Bool & Impure =
-        use Text/Regex/Matcher.{runsMatcher, getMatch};
+        use Text.Regex.Matcher.{runsMatcher, getMatch};
         runsMatcher(getMatch(), ".*", "aa") == Ok("aa")
 
 
     @test
     def getMatch02(): Bool & Impure =
-        use Text/Regex/Matcher.{runsMatcher, flatMap, point, getMatch};
+        use Text.Regex.Matcher.{runsMatcher, flatMap, point, getMatch};
         let p1 = forM (_ <- getMatch(); b <- getMatch()) yield b;
         runsMatcher(p1, "\\w+", "aa bb") == Ok("bb")
 
@@ -49,7 +49,7 @@ namespace TestMatcher {
 
     @test
     def count01(): Bool & Impure =
-        use Text/Regex/Matcher.{runsMatcher, getMatch, count};
+        use Text.Regex.Matcher.{runsMatcher, getMatch, count};
         let regex = "\\p{Alpha}+";
         runsMatcher(count(3, getMatch()), regex, "aa bb cc") == Ok("aa" :: "bb" :: "cc" :: Nil)
 */

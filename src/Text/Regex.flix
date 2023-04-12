@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-namespace Text/Regex {
+mod Text.Regex {
 
-    use Regex.Pattern;
-    use Regex.Pattern.Pattern;
 
 
     // # Matchers
@@ -25,113 +23,113 @@ namespace Text/Regex {
     ///
     /// Returns `Some(ans)` if the entire string `s` is matched by the pattern `p`.
     ///
-    pub def matchAll(p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, matches, matchResult};
+    pub def matchAll(p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, matches, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             if (matches(m)) 
                 matchResult(m)
             else
-                Text/Regex/MatchResult.noMatch()
+                Text.Regex.MatchResult.noMatch()
         }
 
     ///
     /// Returns `Some(ans)` if the entire string `s` is matched by the pattern `p`.
     ///
-    pub def matchAllContent(p: Pattern, s: String): Option[String] =
-        matchAll(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def matchAllContent(p: Regex, s: String): Option[String] =
+        matchAll(p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     ///
     /// Returns the first result matched by the pattern `p` on the input `s`.
     ///
-    pub def firstSubmatch(p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, find!, matchResult};
+    pub def firstSubmatch(p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, find!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             if (find!(m)) 
                 matchResult(m)
             else
-                Text/Regex/MatchResult.noMatch()
+                Text.Regex.MatchResult.noMatch()
         }
 
-    pub def firstSubmatchContent(p: Pattern, s: String): Option[String] =
-        firstSubmatch(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def firstSubmatchContent(p: Regex, s: String): Option[String] =
+        firstSubmatch(p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     ///
     /// Returns the last result matched by the pattern `p` on the input `s`.
     ///
-    pub def lastSubmatch(p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, findLast!, matchResult};
+    pub def lastSubmatch(p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, findLast!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             if (findLast!(m)) 
                 matchResult(m)
             else
-                Text/Regex/MatchResult.noMatch()
+                Text.Regex.MatchResult.noMatch()
         }
     
 
-    pub def lastSubmatchContent(p: Pattern, s: String): Option[String] =
-        lastSubmatch(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def lastSubmatchContent(p: Regex, s: String): Option[String] =
+        lastSubmatch(p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     ///
     /// Returns the first result matched by the pattern `p` on the input `s`.
     ///
-    pub def firstSubmatchWithOffset(p: Pattern, o: Int32, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, findFrom!, matchResult};
+    pub def firstSubmatchWithOffset(p: Regex, o: Int32, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, findFrom!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match findFrom!(o, m) {
                 case Ok(true) => matchResult(m) 
-                case _        => Text/Regex/MatchResult.noMatch()
+                case _        => Text.Regex.MatchResult.noMatch()
             }
         }
 
-    pub def firstSubmatchWithOffsetContent(p: Pattern, o: Int32, s: String): Option[String] =
-        firstSubmatchWithOffset(p, o, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def firstSubmatchWithOffsetContent(p: Regex, o: Int32, s: String): Option[String] =
+        firstSubmatchWithOffset(p, o, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
     ///
     /// Returns the last result matched by the pattern `p` on the input `s`.
     ///
-    pub def lastSubmatchWithOffset(p: Pattern, o: Int32, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, findLastFrom!, matchResult};
+    pub def lastSubmatchWithOffset(p: Regex, o: Int32, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, findLastFrom!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match findLastFrom!(o, m) {
                 case Ok(true) => matchResult(m)
-                case _        => Text/Regex/MatchResult.noMatch()
+                case _        => Text.Regex.MatchResult.noMatch()
             }
         }
 
-    pub def lastSubmatchWithOffsetContent(p: Pattern, o: Int32, s: String): Option[String] =
-        lastSubmatchWithOffset(p, o, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def lastSubmatchWithOffsetContent(p: Regex, o: Int32, s: String): Option[String] =
+        lastSubmatchWithOffset(p, o, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     ///
     /// Returns the start substring of `s` matched by the pattern `p`.
     ///
-    pub def matchPrefix(p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, lookingAt, matchResult};
+    pub def matchPrefix(p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, lookingAt, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             if (lookingAt(m)) 
                 matchResult(m) 
             else
-                Text/Regex/MatchResult.noMatch()
+                Text.Regex.MatchResult.noMatch()
         }
 
-    pub def matchPrefixContent(p: Pattern, s: String): Option[String] =
-        matchPrefix(p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def matchPrefixContent(p: Regex, s: String): Option[String] =
+        matchPrefix(p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     ///
     /// Match input `s` with pattern `p`, must match the whole of the bounded region...
     ///
-    pub def isBoundedMatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, matches};
+    pub def isBoundedMatch(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Bool =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, matches};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
@@ -143,8 +141,8 @@ namespace Text/Regex {
     ///
     /// Match input within region
     ///
-    pub def isBoundedSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, find!};
+    pub def isBoundedSubmatch(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Bool =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, find!};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
@@ -156,8 +154,8 @@ namespace Text/Regex {
 
 
     /// Match input within region, match must start at start of region...
-    pub def boundedStartsWith(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Bool =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt};
+    pub def boundedStartsWith(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Bool =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, lookingAt};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
@@ -170,74 +168,74 @@ namespace Text/Regex {
 
     ///
     ///
-    pub def boundedMatchAll(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, matches, matchResult};
+    pub def boundedMatchAll(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, matches, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
-                case Err(msg) => Text/Regex/MatchResult.throwError(msg)
+                case Err(msg) => Text.Regex.MatchResult.throwError(msg)
                 case Ok()     =>
                     if (matches(m)) 
                         matchResult(m) 
                     else
-                        Text/Regex/MatchResult.noMatch()
+                        Text.Regex.MatchResult.noMatch()
             }
         }
 
 
-    pub def boundedMatchAllContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
-        boundedMatchAll(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedMatchAllContent(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Option[String] =
+        boundedMatchAll(start, end, p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
-    pub def boundedFirstSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, find!, matchResult};
+    pub def boundedFirstSubmatch(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, find!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
-                case Err(msg) => Text/Regex/MatchResult.throwError(msg)
+                case Err(msg) => Text.Regex.MatchResult.throwError(msg)
                 case Ok()     =>
                     if (find!(m)) 
                         matchResult(m)
                     else
-                        Text/Regex/MatchResult.noMatch()
+                        Text.Regex.MatchResult.noMatch()
             }
         }
 
-    pub def boundedFirstSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
-        boundedFirstSubmatch(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedFirstSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Option[String] =
+        boundedFirstSubmatch(start, end, p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
-    pub def boundedLastSubmatch(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, findLast!, matchResult};
+    pub def boundedLastSubmatch(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, findLast!, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
-                case Err(msg) => Text/Regex/MatchResult.throwError(msg)
+                case Err(msg) => Text.Regex.MatchResult.throwError(msg)
                 case Ok()   =>
                     if (findLast!(m)) 
                         matchResult(m)
                     else
-                        Text/Regex/MatchResult.noMatch()
+                        Text.Regex.MatchResult.noMatch()
             }
         }
 
-    pub def boundedLastSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
-        boundedLastSubmatch(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedLastSubmatchContent(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Option[String] =
+        boundedLastSubmatch(start, end, p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
-    pub def boundedMatchPrefix(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): MatchResult =
-        use Text/Regex/Matcher.{newMatcher, setBounds!, lookingAt, matchResult};
+    pub def boundedMatchPrefix(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): MatchResult =
+        use Text.Regex.Matcher.{newMatcher, setBounds!, lookingAt, matchResult};
         region r {
             let m = newMatcher(r, p, s);
             match setBounds!(start, end, m) {
-                case Err(msg) => Text/Regex/MatchResult.throwError(msg)
+                case Err(msg) => Text.Regex.MatchResult.throwError(msg)
                 case Ok()   =>
                     if (lookingAt(m)) 
                         matchResult(m)
                     else
-                        Text/Regex/MatchResult.noMatch()
+                        Text.Regex.MatchResult.noMatch()
             }
         }
 
-    pub def boundedMatchPrefixContent(start: {start = Int32}, end: {end = Int32}, p: Pattern, s: String): Option[String] =
-        boundedMatchPrefix(start, end, p, s) |> Text/Regex/MatchResult.content |> Result.toOption
+    pub def boundedMatchPrefixContent(start: {start = Int32}, end: {end = Int32}, p: Regex, s: String): Option[String] =
+        boundedMatchPrefix(start, end, p, s) |> Text.Regex.MatchResult.content |> Result.toOption
 
 
     // # Multiple results
@@ -245,8 +243,8 @@ namespace Text/Regex {
     ///
     /// TODO: use a "Stream" when stdlib has an implementation finalized
     ///
-    pub def matchResultsAll(p: Pattern, s: String): List[MatchResult] =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def matchResultsAll(p: Regex, s: String): List[MatchResult] =
+        use Text.Regex.Matcher.{newMatcher};
         region r {
             let m = newMatcher(r, p, s);
             allMatchResultsHelper(m, identity)
@@ -254,10 +252,10 @@ namespace Text/Regex {
 
 
     def allMatchResultsHelper(m: Matcher[r], k: List[MatchResult] -> List[MatchResult]): List[MatchResult] \Read(r) =
-        use Text/Regex/Matcher.{find!, matchResult};
+        use Text.Regex.Matcher.{find!, matchResult};
         if (find!(m))
             match matchResult(m) {
-                case r1 if not Text/Regex/MatchResult.isValid(r1) => k(Text/Regex/MatchResult.throwError("matchResultsAll Fail") :: Nil)
+                case r1 if not Text.Regex.MatchResult.isValid(r1) => k(Text.Regex.MatchResult.throwError("matchResultsAll Fail") :: Nil)
                 case r1                                           => allMatchResultsHelper(m, ks -> k(r1 :: ks))
             }
         else
@@ -273,17 +271,17 @@ namespace Text/Regex {
     ///
     /// Splits the string `s` around matches of the pattern `p` within the region `bounds`.
     ///
-    pub def boundedSplit(start: {start = Int32}, end: {end = Int32}, patt: Pattern, input: String): List[String] =
+    pub def boundedSplit(start: {start = Int32}, end: {end = Int32}, patt: Regex, input: String): List[String] =
         let input1 = String.slice(start, end, input);
-        Regex.split(pattern = patt, input1)
+        Regex.split(regex = patt, input1)
 
 
 
 
     /// Rewrite Strategies
 
-    pub def rewriteAll(f: String -> String, p: Pattern, s: String): String =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def rewriteAll(f: String -> String, p: Regex, s: String): String =
+        use Text.Regex.Matcher.{newMatcher};
         region rc {
             let m = newMatcher(rc, p, s);
             let sb = StringBuilder.new(rc);
@@ -292,8 +290,8 @@ namespace Text/Regex {
         }
 
     def rewriteAllHelper(f: String -> String, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
-        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
-        use Text/Regex/MatchResult.{content};
+        use Text.Regex.Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text.Regex.MatchResult.{content};
         if (find!(m))
             match matchResult(m) |> content {
                 case Err(_) => ()
@@ -303,8 +301,8 @@ namespace Text/Regex {
             appendTail!(sb, m)
 
 
-    pub def rewriteSome(f: String -> Option[String], p: Pattern, s: String): String =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def rewriteSome(f: String -> Option[String], p: Regex, s: String): String =
+        use Text.Regex.Matcher.{newMatcher};
         region rc {
             let m = newMatcher(rc, p, s);
             let sb = StringBuilder.new(rc);
@@ -313,8 +311,8 @@ namespace Text/Regex {
         }
 
     def rewriteSomeHelper(f: String -> Option[String], sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
-        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
-        use Text/Regex/MatchResult.{content};
+        use Text.Regex.Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text.Regex.MatchResult.{content};
         if (find!(m))
             match matchResult(m) |> content {
                 case Err(_) => ()
@@ -326,8 +324,8 @@ namespace Text/Regex {
         else
             appendTail!(sb, m)
 
-    pub def rewriteAllWithIndex(f: (Int32, String) -> String, p: Pattern, s: String): String =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def rewriteAllWithIndex(f: (Int32, String) -> String, p: Regex, s: String): String =
+        use Text.Regex.Matcher.{newMatcher};
         region rc {
             let m = newMatcher(rc, p, s);
             let sb = StringBuilder.new(rc);
@@ -336,8 +334,8 @@ namespace Text/Regex {
         }
 
     def rewriteAllWithIndexHelper(f: (Int32, String) -> String, acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
-        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
-        use Text/Regex/MatchResult.{content};
+        use Text.Regex.Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text.Regex.MatchResult.{content};
         if (find!(m))
             match matchResult(m) |> content {
                 case Err(_) => ()
@@ -347,8 +345,8 @@ namespace Text/Regex {
             appendTail!(sb, m)
 
 
-    pub def rewriteSomeWithIndex(f: (Int32, String) -> Option[String], p: Pattern, s: String): String =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def rewriteSomeWithIndex(f: (Int32, String) -> Option[String], p: Regex, s: String): String =
+        use Text.Regex.Matcher.{newMatcher};
         region rc {
             let m = newMatcher(rc, p, s);
             let sb = StringBuilder.new(rc);
@@ -357,8 +355,8 @@ namespace Text/Regex {
         }
 
     def rewriteSomeWithIndexHelper(f: (Int32, String) -> Option[String], acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
-        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
-        use Text/Regex/MatchResult.{content};
+        use Text.Regex.Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text.Regex.MatchResult.{content};
         if (find!(m))
             match matchResult(m) |> content {
                 case Err(_) => ()
@@ -371,8 +369,8 @@ namespace Text/Regex {
             appendTail!(sb, m)
 
 
-    pub def rewriteFirstN(ntimes: Int32, f: String -> String, p: Pattern, s: String): String =
-        use Text/Regex/Matcher.{newMatcher};
+    pub def rewriteFirstN(ntimes: Int32, f: String -> String, p: Regex, s: String): String =
+        use Text.Regex.Matcher.{newMatcher};
         if (ntimes <= 0 )
             s
         else 
@@ -384,8 +382,8 @@ namespace Text/Regex {
             }
 
     def rewriteFirstNHelper(ntimes: Int32, f: String -> String, acc: Int32, sb: StringBuilder[r], m: Matcher[r]): Unit \ Write(r) =
-        use Text/Regex/Matcher.{find!, matchResult, appendReplacement!, appendTail!};
-        use Text/Regex/MatchResult.{content};
+        use Text.Regex.Matcher.{find!, matchResult, appendReplacement!, appendTail!};
+        use Text.Regex.MatchResult.{content};
         if (ntimes < acc and find!(m))
             match matchResult(m) |> content {
                 case Err(_) => ()

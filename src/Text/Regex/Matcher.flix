@@ -16,7 +16,7 @@
 
 
 
-namespace Text/Regex {
+namespace Text.Regex {
 
 
     /// Matcher is imperative - it can be seen a a stepper through a stream 
@@ -30,16 +30,14 @@ namespace Text/Regex {
 
 }
 
-namespace Text/Regex/Matcher {
+mod Text.Regex.Matcher {
 
 
-    use Text/Regex.{Matcher};
-    use Text/Regex.Matcher.{Matcher};
+    use Text.Regex.{Matcher};
+    use Text.Regex.Matcher.{Matcher};
 
-    use Text/Regex.MatchResult;
-    use Text/Regex.MatchResult.{MatchResult};
-    use Regex.Pattern;
-    use Regex.Pattern.{Pattern};
+    use Text.Regex.MatchResult;
+    use Text.Regex.MatchResult.{MatchResult};
     use StringBuilder.{StringBuilder};
 
     def getMatcher(m: Matcher[r]): ##java.util.regex.Matcher = 
@@ -49,10 +47,9 @@ namespace Text/Regex/Matcher {
     ///
     /// Create a Matcher for Pattern `patt` on the source String `input`.
     ///
-    pub def newMatcher(_: Region[r], p: Pattern, s: String): Matcher[r] \ Write(r) =
+    pub def newMatcher(_: Region[r], p: Regex, s: String): Matcher[r] \ Write(r) =
         import java.util.regex.Pattern.matcher(##java.lang.CharSequence): ##java.util.regex.Matcher \ r;
-        let Pattern(p1) = p;
-        Matcher(matcher(p1, unchecked_cast(s as ##java.lang.CharSequence)))
+        Matcher(matcher(p, unchecked_cast(s as ##java.lang.CharSequence)))
 
 
 
@@ -277,15 +274,14 @@ namespace Text/Regex/Matcher {
     ///
     /// Change the pattern used by this matcher.
     ///
-    pub def setPattern!(p: Pattern, m: Matcher[r]): Result[String, Unit] \ Write(r) =
+    pub def setPattern!(p: Regex, m: Matcher[r]): Result[String, Unit] \ Write(r) =
         import java.util.regex.Matcher.usePattern(##java.util.regex.Pattern): ##java.util.regex.Matcher \ r;
         try {
             let Matcher(m1) = m;
-            let Pattern(p1) = p;
-            let _ = usePattern(m1, p1);
+            let _ = usePattern(m1, p);
             Ok()
         } catch {
-            case _: ##java.lang.Exception => Err("usePattern!")
+            case _: ##java.lang.Exception => Err("setPattern!")
         }
 
 

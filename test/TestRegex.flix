@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-namespace TestRegex {
+mod TestRegex {
 
 
     /////////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace TestRegex {
     // def isMatch01(): Bool =
     //     use Functor.{<$$>};
     //     let step = () -> {
-    //         Text/Regex/Pattern.compile(".*") <$$> flip(Text/Regex.isMatch, "")
+    //         Text.Regex.Pattern.compile(".*") <$$> flip(Text.Regex.isMatch, "")
     //     };
     //     step() == Ok(true)
 

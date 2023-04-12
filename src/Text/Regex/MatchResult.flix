@@ -20,7 +20,7 @@
 
 
 
-namespace Text/Regex {
+mod Text.Regex {
 
     ///
     /// Represents a MatchResult.
@@ -30,10 +30,10 @@ namespace Text/Regex {
 
 }
 
-namespace Text/Regex/MatchResult {
+mod Text.Regex.MatchResult {
 
-    use Text/Regex.MatchResult;
-    use Text/Regex.MatchResult.{MatchResult};
+    use Text.Regex.MatchResult;
+    use Text.Regex.MatchResult.{MatchResult};
 
     def getMatchResult(m: MatchResult): Result[String, ##java.util.regex.MatchResult] = 
         let MatchResult(m1) = m;
