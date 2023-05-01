@@ -16,7 +16,7 @@
 
 
 
-namespace Text.Regex {
+mod Text.Regex {
 
 
     /// Matcher is imperative - it can be seen a a stepper through a stream 
